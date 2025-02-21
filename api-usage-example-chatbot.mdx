@@ -1,0 +1,179 @@
+---
+title: Begin met Chatten met Chatbot
+---
+
+In deze sectie zullen we je begeleiden bij het starten van een chat met je chatbot met behulp van de Chatwize API.  
+Voordat je begint, zorg ervoor dat je voldoet aan de volgende vereisten:
+
+## Vereisten
+
+- Een API-sleutel voor toegang tot de Chatwize API.
+- Een ontwikkelomgeving of tool voor het uitvoeren van HTTP-verzoeken, zoals Curl of een programmeertaal als Python.
+
+<Note>
+    Houd er rekening mee dat om over specifieke onderwerpen te chatten, je chatbot relevante data-bronnen moet hebben geüpload.
+</Note>
+
+## Waarom een Chat Sessie Maken?
+
+Voordat je berichten naar de chatbot verstuurt, is het essentieel om een chatsessie aan te maken. Een chatsessie fungeert als een container die alle berichten bevat die tussen jou en de chatbot worden uitgewisseld. Hier is waarom het aanmaken van een chatsessie noodzakelijk is:
+
+1. **Berichtcontext:** Een chatsessie stelt je in staat de context gedurende een gesprek te behouden. Het zorgt ervoor dat de chatbot de context van je vragen of opmerkingen begrijpt.
+
+2. **Volgorde van Berichten:** De chatsessie helpt bij het behouden van de volgorde van berichten. Dit is cruciaal voor het voeren van zinvolle en samenhangende gesprekken met de chatbot.
+
+3. **Staatbeheer:** De chatsessie stelt je in staat de staat van het gesprek te beheren. Je kunt een gesprek naadloos voortzetten door te verwijzen naar de sessie UUID.
+
+## Maak een Chat Sessie aan
+
+Om een chatsessie aan te maken, moet je een POST-verzoek gebruiken naar de API-endpoint: `https://app.chatwize.ai/api/v1/chatbot/{uuid}/session/create`.
+
+<Warning>Zorg ervoor dat je `{uuid}` vervangt door de UUID van je chatbot.</Warning>
+
+## Voorbeeldverzoek
+
+Hieronder vind je voorbeeldcommando's om een chatbot aan te maken met behulp van de Chatwize API:
+
+<Warning>Vervang **token** door je daadwerkelijke API key.</Warning>
+
+<CodeGroup>
+
+```bash Curl
+curl --location --request POST 'https://app.chatwize.ai/api/v1/chatbot/{uuid}/session/create' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer <token>' \
+```
+
+```py Python
+import requests
+
+url = 'https://app.chatwize.ai/api/v1/chatbot/{uuid}/session/create'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer <token>'
+}
+
+params = {
+    'uuid': '<chatbot-uuid>'
+}
+
+response = requests.post(url,  headers=headers, params=params)
+
+if response.status_code == 200:
+    print("Request successful!")
+    print(response.json())
+else:
+    print("Request failed with status code:", response.status_code)
+    print(response.text)
+```
+
+```ts JavaScript
+const axios = require('axios');
+
+const url = 'https://app.chatwize.ai/api/v1/chatbot/{uuid}/session/create';
+const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer <token>'
+};
+
+const params = {
+    uuid: '<chatbot-uuid>'
+};
+
+axios.post(url, { headers, params })
+    .then(response => {
+        console.log('Request successful!');
+        console.log(response.data);
+    })
+    .catch(error => {
+        console.error('Request failed:', error);
+    });
+```
+
+</CodeGroup>
+
+Dit API-verzoek retourneert JSON-data die je kunt hergebruiken om berichten te versturen:
+
+```json
+{
+  "created_at": "string",
+  "modified_at": "string",
+  "uuid": "string"
+}
+```
+
+De `uuid` uit deze response is essentieel voor het versturen van berichten binnen de aangemaakte chatsessie.
+
+## Berichten Versturen
+
+Met een aangemaakte chatsessie kun je nu berichten naar je chatbot versturen. Gebruik de volgende API-endpoint om berichten te versturen:  
+`https://app.chatwize.ai/api/v1/session/{uuid}/message/stream`
+
+<Warning>Zorg ervoor dat je `{uuid}` vervangt door de UUID van de aangemaakte sessie.</Warning>
+
+## Voorbeeldverzoek
+
+Hieronder vind je voorbeeldcommando's om een bericht aan te maken met behulp van de Chatwize API:
+
+<Warning>Vervang **token** door je daadwerkelijke API key.</Warning>
+
+<CodeGroup>
+```bash Curl
+curl --location --request POST 'https://app.chatwize.ai/api/v1/session/{uuid}/message/stream' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
+--data-raw '{"query": "Your query goes here"}'
+```
+
+```py Python
+import requests
+
+url = f"https://app.chatwize.ai/api/v1/session/{uuid}/message/stream"
+headers = {
+    "Authorization": "Bearer YOUR_ACCESS_TOKEN",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "query": "Your query goes here"
+}
+
+response = requests.post(url, headers=headers, json=data, stream=True)
+
+if response.status_code == 200:
+    for line in response.iter_lines(decode_unicode=True):
+        # Process streaming response here
+        print(line)
+else:
+    print("Error:", response.status_code)
+```
+
+```ts JavaScript
+const xhr = new XMLHttpRequest();
+xhr.open("POST", `https://app.chatwize.ai/api/v1/session/{uuid}/message/stream`, true);
+
+xhr.setRequestHeader("Authorization", "Bearer YOUR_ACCESS_TOKEN");
+xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+const data = JSON.stringify({"query": "Your query goes here"});
+
+xhr.send(data);
+
+xhr.onprogress = () => {
+    const streamingResponse = xhr.responseText;
+    console.log(streamingResponse);
+};
+
+xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+            console.log("Streaming completed successfully");
+        } else {
+            console.error("Error:", xhr.status);
+        }
+    }
+};
+```
+</CodeGroup>
+
+Dat is het! Je hebt nu geleerd hoe je met je eigen chatbot kunt chatten met behulp van de GPT-trainer API.

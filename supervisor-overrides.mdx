@@ -1,0 +1,99 @@
+---
+title: AI Supervisor Overrides
+---
+
+Als je een multi-Agent chatbot setup hebt, gebruikt Chatwize een AI Supervisor om automatisch te bepalen welke user-facing Agent het meest geschikt is voor het afhandelen van de meest recente input query. Er kunnen echter momenten zijn waarop je meer “deterministische” controle wilt hebben over welke Agent de taak uitvoert.
+
+In dit artikel laten we zien hoe je AI Supervisor Overrides kunt gebruiken om logische voorwaarden in te stellen die, wanneer voldaan, direct overschakelen naar een aangewezen Agent.
+
+In het AI Agents tabblad zie je een knop die de “AI Supervisor Settings” drawer uitklapt:
+
+<Frame>
+  <img src="/images/supervisor-overrides-1.png" />
+</Frame>
+
+Nadat je het hebt geopend, kun je in het “Rules” tabblad conditionele regels specificeren die elke keer worden geëvalueerd wanneer de gebruiker een query invoert in je chatbot. Deze voorwaarden, indien voldaan, zullen het oordeel van de AI Supervisor omzeilen en ervoor zorgen dat een aangewezen Agent de huidige input query afhandelt.
+
+Om een nieuwe regel toe te voegen, klik op de “Create new rule” knop. Om regels te bewerken, ga naar het driepuntjes-menu aan de rechterbovenkant van de regel en selecteer “Edit” in het dropdown-menu.
+
+<Note>
+  Let op: je moet mogelijk naar beneden scrollen in het dropdown-menu om extra opties te zien wanneer je de regel aan het opbouwen bent.
+</Note>
+
+Zodra je tevreden bent met de regels, zorg ervoor dat je ze “Connect” zodat ze actief worden. Regels worden in een evaluatiewachtrij geplaatst. Dit betekent dat zodra een regel evalueert naar **TRUE**, alle volgende regel evaluaties worden overgeslagen en die regel onmiddellijk wordt uitgevoerd.
+
+<Frame>
+  <img src="/images/supervisor-overrides-2.png" />
+</Frame>
+
+Een goed voorbeeld van AI Supervisor Override in actie is de “delayed lead collection” setup. Beschouw het scenario waarin je een chatbot wilt bouwen die algemene FAQ’s afhandelt, maar je wilt beginnen met het verzamelen van gebruikersinformatie na 2-3 vragen. Bovendien wil je ervoor zorgen dat als de gebruiker erop staat zijn informatie niet te verstrekken, je chatbot hen blijft bedienen als een anonieme entiteit in plaats van verdere zinvolle interacties volledig te weigeren.
+
+Eerst heb je een reguliere “Lead Collection” setup nodig, beschreven in ons [Lead Collection](/lead-collection) artikel. Zodra je klaar bent, ga je verder hieronder.
+
+Op dit punt zou je twee user-facing Agents ingesteld moeten hebben:
+
+<Frame>
+  <img src="/images/supervisor-overrides-3.png" />
+</Frame>
+
+Vervolgens, open AI Supervisor Settings. Klik op “Create new rule”. In het driepuntjes-menu in de rechterbovenhoek, selecteer “Edit”. Je gaat de bewerkingsmodus voor de regel in. Voor ons scenario hebben we de volgende voorwaarden ingesteld:
+
+<Frame>
+  <img src="/images/supervisor-overrides-5.png" />
+</Frame>
+
+Dit betekent dat zodra het “total # of user input queries” precies gelijk is aan 3, de AI Supervisor de Agent zal instellen op Lead Collection. Klik op “Save”.
+
+Voeg vervolgens een andere regel toe. Deze keer passen we de volgende voorwaarden toe:
+
+  1. Als de huidige Agent Lead Collection is,
+  2. EN, als het aantal opeenvolgend afgehandelde queries door de huidige actieve Agent minder is dan 4...
+  3. EN, als een van de gebruikersinformatie (name, email, phone) niet is opgegeven...
+  4. DAN blijf op de Lead Collection Agent.
+
+Dit betekent dat de Lead Collection Agent blijft vragen om gebruikersinformatie totdat hij ten minste 4 keer met de gebruiker heeft gesproken of totdat alle gevraagde informatie succesvol is verzameld.
+
+Terwijl je in de bewerkingsmodus bent, klik op “Add Rule” om een nieuwe voorwaarde toe te voegen voor evaluatie. In stap 2 hierboven zou je regelopzet er als volgt uit moeten zien:
+
+<Frame>
+  <img src="/images/supervisor-overrides-6.png" />
+</Frame>
+
+Stap 3 vereist een “group” evaluatie waarbij de voorwaarden als volgt worden gedefinieerd:
+
+  - Als de variabele “user_name” niet is opgegeven...
+  - OF, als de variabele “user_email” niet is opgegeven...
+  - OF, als de variabele “user_phone” niet is opgegeven...
+  - Dan evalueert het naar TRUE
+
+Dus stellen we de volgende “Group” in:
+
+<Frame>
+  <img src="/images/supervisor-overrides-7.png" />
+</Frame>
+
+Vervolgens, binnen de “Group”, klik op “Add Rule” en stel de juiste conditionele statements in:
+
+<Frame>
+  <img src="/images/supervisor-overrides-8.png" />
+</Frame>
+
+Ten slotte, zoals in stap 4, zorg ervoor dat de “Lead Collection” Agent wordt toegewezen wanneer de regel wordt uitgevoerd:
+
+<Frame>
+  <img src="/images/supervisor-overrides-9.png" />
+</Frame>
+
+Verbind je regels via dezelfde driepuntjes-menu optie “Connect”. Als het succesvol is, zouden ze een groene “Active” status moeten tonen:
+
+<Frame>
+  <img src="/images/supervisor-overrides-10.png" />
+</Frame>
+
+Nu kunnen we naar “Preview” gaan en de chatbot testen onder deze nieuwe set AI Supervisor Overrides. Je zou het juiste gedrag moeten opmerken. In de debug view zou je een “override” tag naast de Active Agent moeten zien als een override regel wordt afgedwongen.
+
+<Frame>
+  <img src="/images/supervisor-overrides-11.png" />
+</Frame>
+
+Je kunt vele complexe workflows ontwerpen met behulp van AI Supervisor Overrides. Dit is echter een geavanceerde functie die direct controle biedt over hoe de AI Supervisor zich gedraagt. We raden sterk aan om je configuratie grondig te testen voordat je deze inzet, indien je gebruik wilt maken van deze functie.

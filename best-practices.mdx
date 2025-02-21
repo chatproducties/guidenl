@@ -1,0 +1,76 @@
+---
+title: Best practices voor het voorbereiden van trainingsgegevens
+---
+
+De nauwkeurigheid en consistentie van je chatbot hangt af van een aantal factoren:
+
+- Kwaliteit van je trainingsgegevens
+- Keuze van het Large Language Model (LLM)
+- Duidelijkheid van de basisprompt
+
+LLM's, zoals alle statistische modellen, hebben trainingsgegevens nodig tijdens hun constructie. In de AI-onderzoekswereld wordt vaak gezegd: "Je model is slechts zo goed als je trainingsgegevens". 
+
+De beste manier om de prestaties van je chatbot te optimaliseren, is door de trainingsgegevens op te schonen. In de volgende sectie geven we enkele best practices voor het structureren van je trainingsgegevens.
+
+LLM's "denken" niet zoals mensen dat doen. Ze interpreteren en verwerken gegevens op een andere manier. Om te begrijpen hoe de machine deze gegevens gebruikt, richten we onze discussie op "chunks".
+
+## Chunk-splitsing
+
+Tijdens RAG worden chunks geselecteerd en samen met de basisprompt geïnjecteerd in de originele invoervraag van de gebruiker. Deze chunks worden direct afgeleid van je geüploade trainingsgegevens - PDF's, Word-documenten, websites, TXT-bestanden, enz. Omdat LLM's tokenlimieten hebben, moeten we ook beperkingen opleggen aan de grootte van deze chunks.
+
+Dit betekent dat zelfs als je oorspronkelijke document een lang hoofdstuk over één onderwerp bevat, het moet worden opgedeeld in meerdere chunks en afzonderlijk moet worden opgeslagen in onze vector-database.
+
+Hoe kunnen we een document opsplitsen met minimale wijzigingen in de oorspronkelijke betekenis?
+
+Helaas is er geen universele oplossing. Dit is nog steeds een lopend wetenschappelijk onderzoeksveld. Chatwize gebruikt een combinatie van regelgebaseerde en statistische relevantie-algoritmen om trainingsgegevens op te splitsen, maar we kunnen niet altijd garanderen dat elke chunk op zichzelf staand, schoon en nauwkeurig is. Gelukkig zijn LLM's gespecialiseerd in het werken met ongestructureerde tekst en hebben ze een hoge tolerantie voor slecht geformatteerde invoer bij het genereren van antwoorden.
+
+## Chunk-kwaliteit
+
+Een andere bron van fouten komt voort uit de inhoud van de chunks zelf. Idealiter moet elke chunk op zichzelf staan, semantisch consistent en grammaticaal correct zijn. Als de documentstructuur belangrijk is, moet elke chunk ook relevante metadata bevatten die aangeeft waar in het document deze zich bevindt. Dit kan echter niet altijd worden gegarandeerd bij de extractie van chunks uit geüploade tekst.
+
+Deze fout is vooral merkbaar bij websites. Aangezien webbrowsers websites anders renderen dan hoe een webscraper ze ziet, kan wat jij ziet heel anders zijn dan wat onze scraper vastlegt. Bovendien gaan de meeste lay-outinformatie en gegevens die zich in afbeeldingen, illustraties en video's bevinden, verloren tijdens het scrapingproces.
+
+<Frame>
+  <img src="/images/best-practices-1.png" />
+</Frame>
+
+_Chatwize’s eigen prijstabel op https://Chatwize.ai/pricing zoals weergegeven in de Chrome-browser._
+
+<Frame>
+  <img src="/images/best-practices-2.png" />
+</Frame>
+
+_Dezelfde website-inhoud, nadat onze scraper deze heeft vastgelegd en chunking is toegepast._
+
+## Geen hiaten, geen overlappingen
+
+RAG vertrouwt op het dynamisch ophalen van een subset referentiegegevens uit de volledige verzameling trainingsmateriaal. 
+Om te bepalen welke chunks de meest relevante informatie bevatten, ondergaat de gebruikersvraag hetzelfde embeddingproces als de chunks zelf. Vervolgens berekenen we een relevantiescore voor elke chunk op basis van de nabijheid van hun embeddingvectoren ten opzichte van de invoer van de gebruiker (cosinusafstand). Daarna worden de chunks gerangschikt en kiest ons algoritme de top _n_ chunks die passen binnen het gereserveerde tokenvenster van het geselecteerde LLM.
+
+Aangezien het algoritme probeert zoveel mogelijk relevante chunks te ontdekken en in te passen, bestaat de mogelijkheid dat chunks met semantisch vergelijkbare, maar feitelijk inconsistente informatie tegelijkertijd worden geïnjecteerd in de referentiecontext van de LLM-aanroep.
+
+Bijvoorbeeld, als een gebruiker vraagt:
+
+**_Wat is de prijs van de iPhone SE?_**
+
+kan het algoritme de volgende chunks ophalen als referentiecontext:
+
+```
+> [Chunk 1] De huidige prijs van de iPhone SE is $250.
+>
+> [Chunk 2] De originele iPhone SE kost $199.
+>
+> [Chunk 3] De prijs van de iPhone 5 is $600.
+```
+
+Zoals je kunt zien, noemen deze chunks allemaal expliciet de prijs van de iPhone SE, dus ze zijn semantisch vergelijkbaar met de oorspronkelijke vraag van de gebruiker. Echter, ze bevatten feitelijk inconsistente informatie. Wanneer dit gebeurt, kan het zijn dat de AI elke keer een ander antwoord genereert, zelfs als dezelfde vraag wordt gesteld.
+
+Om een betere consistentie te waarborgen, raden we aan om een “MECE”-benadering te hanteren bij het uploaden van je trainingsgegevens. MECE staat voor _Mutually Exclusive, Collectively Exhaustive_. Met andere woorden: geen hiaten, geen overlappingen. Als je trainingsgegevens op deze manier zijn gestructureerd, minimaliseer je de kans op tegenstrijdige informatie in de LLM-referentiecontext, waardoor je chatbot zich voorspelbaarder en consistenter gedraagt.
+
+## Verwijder onnodige trainingsgegevens
+
+RAG werkt door semantisch vergelijkbare chunks te koppelen aan de invoervraag van de gebruiker. Aangezien LLM's tokenbeperkingen hebben, kunnen we slechts een beperkt aantal chunks gebruiken als referentiecontext. Daarom geldt: hoe groter je totale kennisbasis, hoe kleiner het percentage informatie dat per query kan worden opgehaald.
+
+Stel bijvoorbeeld dat je 20 chunks aan trainingsgegevens hebt en het LLM kan per keer 10 chunks gebruiken als referentiecontext. Dit betekent dat elke gebruikersvraag 50% van de volledige kennisbasis kan benutten. Aan de andere kant, als je in totaal 2000 chunks hebt, kan elke gebruikersvraag slechts 0,5% van de volledige kennisbasis ophalen.
+
+Grotere kennisbases maken het moeilijker voor het RAG-algoritme om relevante informatie te identificeren. In plaats van alles te uploaden, zal een gerichte set trainingsgegevens de prestaties van je chatbot aanzienlijk verbeteren.

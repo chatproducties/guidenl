@@ -1,0 +1,78 @@
+---
+title: Bring Your Own Key (BYOK) en Prijsstelling
+---
+
+Op 12 april 2024 introduceerde Chatwize nieuwe abonnementen gebaseerd op Bring Your Own Key (BYOK). Met deze functie kunnen in aanmerking komende gebruikers hun eigen OpenAI API-sleutel instellen in hun Chatwize-account en genieten van onbeperkte Message Credits (MC). Nadat alle MC's in je Chatwize-account zijn verbruikt, worden extra AI-gebruikskosten in rekening gebracht op je eigen API-sleutel, waardoor je AI-functies kunt blijven gebruiken. Nieuwe abonnementen bevatten geen maandelijks terugkerende MC's. Je hebt echter nog steeds de optie om add-ons te kopen voor maandelijkse MC's direct bij Chatwize.
+
+## BYOK instellen
+
+Om je eigen OpenAI API-sleutel in te stellen, moet je er eerst een aanvragen op de website van OpenAI. Registreer een account op OpenAI en ga dan naar deze link: https://platform.openai.com/account/api-keys. Extra instructies voor het verkrijgen van een API-sleutel zijn hier te vinden: https://help.openai.com/en/articles/4936850-where-do-i-find-my-openai-api-key.
+
+Nadat je je API-sleutel hebt verkregen, bewaar deze op een **privé en veilige** locatie. Chatwize raadt aan om een aparte API-sleutel te gebruiken voor elke BYOK-toepassing (inclusief Chatwize) en je API-sleutel nooit met anderen te delen. Navigeer vervolgens naar Chatwize. Nadat je bent ingelogd, ga je naar de rechterbovenhoek van de UI en klik je op het "persoon"-icoon om een dropdown-menu te openen.
+
+<Frame>
+  <img src="/images/byok-pricing-guide-1.png" />
+</Frame>
+
+Klik vervolgens op "Account". In de sectie "OpenAI API Key" plak je je API-sleutel en klik je op "Toevoegen".
+
+<Frame>
+  <img src="/images/byok-pricing-guide-2.png" />
+</Frame>
+
+Je bent nu klaar om aan de slag te gaan.
+
+## Budgettering voor AI-gebruik
+
+Over het algemeen is het gebruik van je eigen API-sleutel kostenefficiënter dan het rechtstreeks kopen van MC-add-ons. Om je te helpen de kosten van het gebruik van je BYOK-account te schatten, bieden we de volgende referenties.
+
+<Note>
+  OpenAI wijzigt zijn prijsstelling van tijd tot tijd, dus de informatie die we verstrekken is mogelijk niet altijd up-to-date. 
+  Voor de laatste informatie over OpenAI's prijzen, bezoek https://openai.com/pricing.
+</Note>
+
+De eenvoudigste schatting die je kunt gebruiken is deze:
+
+- Voor GPT-3.5 en GPT-3.5-16k bedragen de kosten ~\$0.0064 USD / MC
+- Voor de GPT-4-serie LLMs bedragen de kosten ~\$0.0028 USD / MC
+
+Bijvoorbeeld, GPT-4-1106-4k gebruikt 20 MC's per query. Om de kosten in USD te schatten: 
+
+```
+$0.0028 * 20 = $0.056 USD
+```
+
+Dit is een ruwe schatting. Werkelijke uitgaven kunnen ongeveer +/- 20% afwijken, omdat OpenAI kosten in rekening brengt op basis van "tokens", waarbij invoer- en uitvoertokens verschillende bedragen kosten, zelfs binnen hetzelfde LLM. Voor meer informatie over tokens, zie: https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them.
+
+Om je gebruik te budgetteren, bieden we een samenvatting op basis van onze **standaard** verdeling van gereserveerde invoer- en uitvoertokens. 
+
+| Model           | Gereserveerd voor Invoer | Gereserveerd voor Uitvoer | Kosten / Invoertoken | Kosten / Uitvoertoken | Totale kosten per query |
+| --------------- | ---------------------- | ---------------------- | ------------------ | ------------------ | ------------------ |
+| GPT-3.5         | 3200                     | 800                      | 0.0000015          | 0.000002          | 0.0064            |
+| GPT-3.5-16k     | 15200                    | 800                      | 0.000003           | 0.000004          | 0.0488            |
+| GPT-4-1106-1k   | 800                      | 200                      | 0.00001            | 0.00003           | 0.014             |
+| GPT-4-1106-4k   | 3200                     | 800                      | 0.00001            | 0.00003           | 0.056             |
+| GPT-4-0125-8k   | 7200                     | 800                      | 0.00001            | 0.00003           | 0.096             |
+
+<Note>
+  Vanaf april 2024 gebruikt Chatwize nog steeds gpt-3.5-turbo-0613 voor GPT-3.5. Dit komt doordat onze interne benchmarks aantonen dat dit model 
+  aanzienlijk beter presteert dan zijn goedkopere tegenhangers.
+</Note>
+
+Zodra we de mogelijkheid introduceren om je eigen tokenlimietverdeling te configureren, kun je je eigen per-query kosten in USD berekenen met deze formule:
+
+```
+totale kosten per query = tokens gereserveerd voor invoer * kosten per invoertoken + tokens gereserveerd voor uitvoer * kosten per uitvoertoken
+```
+
+## BYOK voor white-label commerciële partners
+
+Naast de kosten voor MC-verbruik tijdens LLM-query's, moet je ook betalen voor het draaien van ons AI multi-agent framework met je eigen API-sleutel. 
+
+| Workflow                                       | Geschatte Invoer | Geschatte Uitvoer | Kosten / Invoertoken | Kosten / Uitvoertoken | Geschatte kosten per uitvoering |
+| ---------------------------------------------- | --------------- | --------------- | ------------------ | ------------------ | ------------------------ |
+| AI Agent intent generatie (gpt-4-1106-preview) | 600             | 450             | 0.00001            | 0.00003            | 0.0011                     |
+| Query intent classificatie (gpt-3.5-turbo-1106)| 1000            | 50              | 0.000001           | 0.000002           | 0.0195                     |
+| Variabele extractie (gpt-3.5-turbo-1106)       | 1000            | 100             | 0.000001           | 0.000002           | 0.0012                     |
+
+Alle kosten uit bovenstaande workflows worden direct op je eigen API-sleutel in rekening gebracht. Deze kosten kunnen niet worden doorberekend aan je klanten.

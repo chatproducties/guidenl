@@ -1,0 +1,300 @@
+--- 
+title: RAG from an External Data Provider
+---
+
+Het uploaden van statische bronnen als trainingsdata voor je AI Agents is prima, maar wat als je database enorm is, gestructureerd, extern gehost, of in real-time wordt bijgewerkt? Er is geen manier om de hele database in Chatwize’s statische kennisbibliotheek te dumpen en toch een live koppeling te behouden…
+
+Hier komt function calling om de hoek kijken. Met function calling kun je on-demand data serveren aan je AI Agent in Chatwize tijdens een live conversatiesessie. Om je te laten zien hoe, begeleiden we je door een voorbeeld van RAG-verrijking met behulp van (samenvattingen van) academische papers afkomstig van een vertrouwde aggregator voor academische papers: Semantic Scholar API.
+
+## Het instellen en testen van de functie
+
+Allereerst heb je een API-sleutel nodig van je externe databron, wie dat ook mag zijn, aangenomen dat ze een beveiligde API hebben. In ons geval hebben we er direct één aangevraagd bij [Semantic Scholar](https://www.semanticscholar.org/).
+
+Aangezien we onze LLM-queryresponse willen verrijken met relevante informatie uit academisch onderzoek, moeten we het juiste API-eindpunt vinden om de zoekopdracht uit te voeren. Semantic Scholar biedt daarvoor mooie [documentatie](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get_graph_paper_relevance_search) in dat opzicht.
+
+<Frame>
+  <img src="/images/fc-external-database-api-1.png" />
+</Frame>
+
+Dus, wat geeft dit API-eindpunt als antwoord?
+
+Om de output te inspecteren, hebben we een script uitgevoerd dat een verzoek naar de API doet op basis van hardcoded invoerparameters. De broncode van ons script is hieronder opgenomen. Je hebt je eigen Semantic Scholar API-sleutel nodig als je het zelf wilt uitvoeren. In ons voorbeeld hebben we een zoekopdracht uitgevoerd naar relevante papers over het onderwerp “Multifidelity Optimization” en “Gaussian Processes”.
+
+```python
+import requests
+import json
+import os
+
+# Stel de headers in met de API-sleutel
+headers = {
+    'X-API-KEY': "YOUR OWN API KEY"
+}
+
+# Specificeer de velden die je voor elke aanbevolen paper wilt ophalen
+fields = "paperId,title,authors,abstract,url,referenceCount"
+
+# Definieer de limiet voor het aantal aanbevelingen dat wordt geretourneerd
+limit = 20
+
+# Doe het verzoek om paper-aanbevelingen op te halen
+response = requests.get(
+    'https://api.semanticscholar.org/graph/v1/paper/search',
+    headers=headers,
+    # json=payload,
+    params={'fields': fields, 'limit': limit, 'query':'multifidelity optimization, gaussian processes' }
+)
+
+# Controleer of het verzoek succesvol was
+if response.status_code == 200:
+    print(json.dumps(response.json(), indent=2))
+else:
+    print(f"Error: {response.status_code}")
+    # Het is beter om response.text af te drukken voor niet-200 responses, aangezien deze mogelijk niet in JSON-formaat zijn
+    print(response.text)
+```
+
+De output die we ontvingen ziet er als volgt uit:
+
+```json
+{
+  "total": 12096,
+  "offset": 0,
+  "next": 20,
+  "data": [
+    {
+      "paperId": "b108e6e11f4a96d5058945f3b582a032e8204ade",
+      "url": "https://www.semanticscholar.org/paper/b108e6e11f4a96d5058945f3b582a032e8204ade",
+      "title": "Multifidelity Gaussian processes for failure boundary andprobability estimation",
+      "abstract": "Estimating probability of failure in aerospace systems is a critical requirement for flight certification and qualification. Failure probability estimation (FPE) involves resolving tails of probability distribution and Monte Carlo (MC) sampling methods are intractable when expensive high-fidelity simulations have to be queried. We propose a method to use models of multiple fidelities, which trade accuracy for computational efficiency. Specifically, we propose the use of multifidelity Gaussian process models to efficiently fuse models at multiple fidelity. Furthermore, we propose a novel acquisition function within a Bayesian optimization framework, which can sequentially select samples (or batches of samples for parallel evaluation) from appropriate fidelity models to make predictions about quantities of interest in the highest fidelity. We use our proposed approach within a multifidelity importance sampling (MFIS) setting, and demonstrate our method on the failure level set estimation on synthetic test functions as well as the transonic flow past an airfoil wing section.",
+      "referenceCount": 49,
+      "authors": [
+        {
+          "authorId": "98543101",
+          "name": "Ashwin Renganathan"
+        },
+        {
+          "authorId": "144321616",
+          "name": "Vishwas Rao"
+        },
+        {
+          "authorId": "143672238",
+          "name": "Ionel M. Navon"
+        }
+      ]
+    },
+    {
+      "paperId": "963a5c60ada159d27641a284008f57d6419b26f2",
+      "url": "https://www.semanticscholar.org/paper/963a5c60ada159d27641a284008f57d6419b26f2",
+      "title": "Generative Transfer Optimization for Aerodynamic Design",
+      "abstract": "Transfer optimization, one type of optimization methods, which leverages knowledge of the completed tasks to accelerate the design progress of a new task, has been in widespread use in machine learning community. However, when applying transfer optimization to accelerate the progress of aerodynamic shape optimization (ASO), two challenges are encountered in sequence, that is, (1) how to build a shared design space among the related aerodynamic design tasks, and (2) how to exchange information between tasks most efficiently. To address the first challenge, a datadriven generative model is used to learn airfoil representations from the existing database, with the aim of synthesizing various airfoil shapes in a shared design space. To address the second challenge, both singleand multifidelity Gaussian processes (GPs) are employed to carry out optimization. On one hand, the multifidelity GP is used to leverage knowledge from the completed tasks. On the other hand, mutual learning is established between singleand multifidelity GP models by exchanging information between them in each optimization cycle. With the above, a generative transfer optimization (GTO) framework is proposed to shorten the design cycle of aerodynamic design. Through airfoil optimizations at different working conditions, the effectiveness of the proposed GTO framework is demonstrated.",
+      "referenceCount": 16,
+      "authors": [
+        {
+          "authorId": "2149505113",
+          "name": "Zhendong Guo"
+        },
+        {
+          "authorId": "2153199285",
+          "name": "Wei Sun"
+        },
+        {
+          "authorId": "50258957",
+          "name": "Liming Song"
+        },
+        {
+          "authorId": "46276037",
+          "name": "Jun Yu Li"
+        },
+        {
+          "authorId": "73325644",
+          "name": "Z. Feng"
+        }
+      ]
+    },
+… (truncated due to length)
+```
+
+De Semantic Scholar-functie heeft de top 20 overeenkomende resultaten geretourneerd, gerangschikt op relevantie op basis van onze invoerparameter specificatie. Zoals je ziet, kan de response behoorlijk lang worden, dus hebben we de output ingekort voor de beknoptheid.
+
+Idealiter wil je een gestructureerde JSON-response van de output van de functie, zoals hierboven getoond.
+
+We voerden onze eigen analyse uit voor dit specifieke API-eindpunt (met de specifieke set outputvelden die we hebben opgevraagd) en ontdekten dat gemiddeld elk geretourneerd resultaat tussen de 400-500 tokens lang is. Dit betekent dat, afhankelijk van de tokenlimiet die we voor de functie-output hebben gereserveerd, we maar een beperkt aantal zoekresultaten kunnen bevatten voordat we door de limiet heen gaan. Houd hier rekening mee bij het prioriteren van de informatie die je aan de LLM wilt leveren tijdens RAG.
+
+Nu we weten wat de LLM zal zien als extra context die door de functieaanroep wordt geleverd, kunnen we beginnen met het koppelen ervan aan onze Chatwize Agent.
+
+<Note>
+Het is ALTIJD aan te raden om je eigen script te schrijven en de output van het API-eindpunt eerst te testen. Je wilt precies weten wat voor soort informatie aan je AI Agent wordt gevoed.
+</Note>
+
+## Maak en bereid de AI Agent voor
+
+In je chatbot binnen Chatwize moet je eerst een geschikte AI Agent creëren waaraan je deze function calling-mogelijkheid wilt toewijzen. In ons voorbeeld creëerden we “The Professor”. Vervolgens definieerden we een bijbehorende Agent-beschrijving en basisprompt.
+
+<Frame>
+  <img src="/images/fc-external-database-api-2.png" />
+</Frame>
+
+Voor dit voorbeeld kozen we voor het GPT-4-0125-8k Model. Je kunt onze eenvoudige prompt zien in de onderstaande screenshot.
+
+<Frame>
+  <img src="/images/fc-external-database-api-3.png" />
+</Frame>
+
+Vervolgens slaan we de Agent op en gaan we naar het “Knowledge” tabblad om statische RAG vanuit de eigen kennisbibliotheek van de chatbot uit te schakelen. Dit is alleen noodzakelijk als je geen trainingsdata uit de statische bronnenlijst wilt gebruiken. In ons voorbeeld hebben we toch geen trainingsdata geüpload, maar we doen dit als standaardpraktijk om de zaken netjes te houden.
+
+<Frame>
+  <img src="/images/fc-external-database-api-4.png" />
+</Frame>
+
+Sla de Agent op. 
+
+## Functie-instelling
+
+Ga binnen je Agent naar het “Functions” tabblad. Verander de “Response Context Limit” naar het maximum toegestane. Klik vervolgens op “Add function”.
+
+<Frame>
+  <img src="/images/fc-external-database-api-5.png" />
+</Frame>
+
+Hier geef je de LLM precies aan wat de functie doet en hoe deze werkt. De LLM zal dan zelf bepalen of de functie nodig is wanneer hij op de gebruiker reageert tijdens een conversatie, en deze aanroepen met de juiste parameters indien nodig.
+
+<Frame>
+  <img src="/images/fc-external-database-api-6.png" />
+</Frame>
+
+De functienaam en beschrijving zijn bijzonder nuttig om de AI te helpen begrijpen wat de functie doet. Zorg ervoor dat je in je eigen definitie zo expliciet mogelijk bent. De functiebeschrijving mag minder dan 1024 tekens bevatten, inclusief spaties. In ons geval schreven we het volgende:
+
+```
+Function name: paper_relevance_search
+
+Function description: 
+This function searches Semantic Scholar, a scholarly literature database. The input parameters will be defined based on extracted information from conversation context. It will return search results containing academic paper metadata (with abstracts) in a JSON format.
+The returned fields are defined as follows:
+- title: paper title
+- abstract: paper abstract
+- paperId: paper uuid
+- authors: paper authors
+- year: paper publication year
+- url: paper link
+- referenceCount: number of references included in the paper
+- citationCount: number of citations of this paper
+```
+
+Vervolgens definieer je het API-eindpunt. Het Semantic Scholar-eindpunt dat we gebruiken is eenvoudig en rechttoe rechtaan:
+
+```
+https://api.semanticscholar.org/graph/v1/paper/search
+```
+
+Daarna kies je de HTTP-methode. Voor ons voorbeeld gebruiken we “GET”. Het specifieke API-eindpunt dat je gebruikt, zou documentatie moeten hebben over dit onderscheid.
+
+## Vaste parameters 
+
+Statische (vaste) parameters blijven constant bij alle API-verzoeken. Ze zijn vooraf gedefinieerd en weerspiegelen instellingen of configuraties die niet veranderen bij elk verzoek. Bijvoorbeeld, parameters die het formaat van de response specificeren of die bepaalde functies globaal inschakelen/uitschakelen bij alle API-interacties vallen in deze categorie. De term “static” benadrukt hun onveranderlijke aard.
+
+Afhankelijk van je specifieke API-eindpunt, moet je mogelijk enkele vaste parameters toevoegen in de URL. De API die we hierboven van Semantic Scholar gebruiken, vereist geen vaste parameters. Maar als je een complexer eindpunt gebruikt zoals dit: 
+https://app.outscraper.com/api-docs#tag/Businesses-and-POI/paths/~1maps~1search-v3/get, dan kan je API-eindpunt vaste parameters bevatten en er als volgt uitzien:
+
+```
+https://api.app.outscraper.com/maps/search-v3?async=false&fields=name,full_address,phone,site
+```
+
+Merk op dat aan het einde van "https://api.app.outscraper.com/maps/search-v3" vaste parameters worden toegevoegd. Dit is waar je parameters definieert die niet veranderen wanneer de functie wordt aangeroepen. Definieer vaste parameters altijd op deze manier!
+
+<Note>
+Als je API in staat is een meer beknopte response te retourneren door bepaalde parameters te configureren (d.w.z. de API vertellen overbodige metadata in de response weg te laten), raden we je ten zeerste aan dat te doen. Dit vermindert tokensverspilling en helpt de AI de context beter te begrijpen. In het bovenstaande voorbeeld stelden we "fields=name,full_address,phone,site" specifiek in om de response te beperken zodat deze alleen naam, full_address, telefoon en site-informatie bevat - en niets anders.
+</Note>
+
+## Headers en Authenticatie
+
+Over het algemeen vereisen beveiligde, publiek toegankelijke API's authenticatie. Semantic Scholar is hier geen uitzondering op. In de Header verstrekken we onze API-sleutel. Het specifieke sleutelveld dat gebruikt wordt om je authenticatietoken te leveren, verschilt op basis van de specifieke API die je gebruikt, dus zorg ervoor dat je de documentatie van je API-provider raadpleegt. In ons voorbeeld is het sleutelveld “x-api-key”:
+
+<Frame>
+  <img src="/images/fc-external-database-api-7.png" />
+</Frame>
+
+## Variabele parameters
+
+Tot slot komen we bij variabele parameters.
+
+Variabele (dynamische) parameters veranderen dynamisch op basis van gebruikersinput of de context van de conversatie, in tegenstelling tot hun statische tegenhangers. In function calling passen deze parameters zich aan op basis van de specificiteiten van elk verzoek, die tijdens runtime worden bepaald. Dit zorgt ervoor dat API-aanroepen door de AI zijn afgestemd op de onmiddellijke behoeften van de conversatie, wat een meer gepersonaliseerde en relevante interactie mogelijk maakt. De AI extraheert deze parameters direct uit de dialoog en bepaalt wanneer en hoe de functie moet worden aangeroepen op basis van de lopende conversatie.
+
+Voor onze functie definiëren we de volgende variabele parameters:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "The keywords, author names or exact paper IDs to search for"
+    },
+    "fields": {
+      "type": "string",
+      "description": "The information to be returned, default as 'title,abstract,paperId,authors,year,url,referenceCount,citationCount'"
+    },
+    "limit": {
+      "type": "string",
+      "description": "The number of papers users want to get, default as 2. Use the default for all cases."
+    }
+  },
+  "required": [
+    "query"
+  ]
+}
+```
+
+Merk op dat dit een gestructureerd JSON-formaat is. Onder het sleutelveld “type” van de gehele parameter-set plaatsen we “object”. Je moet hetzelfde doen voor de jouwe.
+
+Onder properties definieer je elke parameter samen met hun type en beschrijving. Neem bijvoorbeeld “query”. Dit heeft het type String, wat betekent dat de datatyp een vrije tekst is. Types kunnen “string”, “integer”, “boolean”, “array”, etc. zijn. De beschrijving is wat vrijer, maar ook uiterst belangrijk. Hier moet je aan de AI uitleggen wat deze parameter vertegenwoordigt. Voor zover mogelijk, geef standaardwaarden en voorbeelden van daadwerkelijke parameterwaarden wanneer de functie wordt aangeroepen. 
+
+Probeer zo expliciet mogelijk te zijn. Onthoud dat als de AI moet raden of een parameter genaamd 'language' 'en' of 'english' als invoer moet aannemen, de kans groot is dat hij het verkeerd raadt, en zul je fouten in de output van je chatbot zien. 
+
+Afhankelijk van de functie waarmee je werkt, kunnen de invoerparameters behoorlijk complex worden. Hieronder staat een ander voorbeeld voor het leveren van parameters aan een functie (NIET gerelateerd aan ons Semantic Scholar-voorbeeld) die een array gebruikt:
+
+```json
+{
+    "type": "object",
+    "properties": {
+        "tags": {
+            "type": "array",
+            "description": "labels that should be assigned to the user’s request",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the label"
+                    },
+                    "color": {
+                        "type": "string",
+                        "description": "The color of the label"
+                    }
+                },
+                "required": ["name", "color"]
+            }
+        }
+    },
+    "required": ["tags"]
+}
+```
+
+De functie kan pas worden aangeroepen zodra de "required" parameters zijn verzameld. Als de nodige informatie ontbreekt, kan de functie niet worden aangeroepen. Je moet definiëren welke parameters verplicht zijn voor het aanroepen van de functie.
+
+Voor aanvullende informatie over het ondersteunde JSON-schema, raadpleeg deze gids: https://json-schema.org/understanding-json-schema/reference/type
+
+## Het testen van de chatbot
+
+Zodra alles is ingesteld, sla je de functie op en daarna de Agent. Vervolgens kun je het testen onder het tabblad “Preview”:
+
+<Frame>
+  <img src="/images/fc-external-database-api-8.png" />
+</Frame>
+
+Je kunt de debugmodus inschakelen met de toggle in de rechterbovenhoek van het scherm. Hiermee kun je de output van de functie inspecteren als deze is aangeroepen tijdens de LLM-response:
+
+<Frame>
+  <img src="/images/fc-external-database-api-9.png" />
+</Frame>
+
+Zo eenvoudig is het: je hebt je AI Agent uitgerust met on-demand informatie van een externe databron. In de toekomst zullen we ook een handleiding schrijven die je helpt je eigen databasesearchfunctie te implementeren en te hosten, die vervolgens geïntegreerd wordt met Chatwize.

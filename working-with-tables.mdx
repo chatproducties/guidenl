@@ -1,0 +1,70 @@
+--- 
+title: Working with Tables and CSV
+---
+
+Chatwize maakt het mogelijk om trainingsgegevens te uploaden in de vorm van **eenvoudige** CSV- of Excel-tabellen. Eenvoudige tabellen verwijzen naar getabelleerde gegevens die geen samengevoegde cellen bevatten, een enkele primaire sleutelkolom met unieke elementen hebben, unieke en informatieve kolom-/rijtitels bevatten, en ofwel kolomgewijze of rij-kolom structurele configuraties hebben.
+
+Voorbeeld van een eenvoudige tabel met alleen kolommen:
+
+<Frame>
+  <img src="/images/working-with-tables-1.png" />
+</Frame>
+
+_Gegevens in elke rij komen overeen met een enkele product-sleutel in de eerste kolom_
+
+Voorbeeld van een eenvoudige rij-/kolomtabel:
+
+<Frame>
+  <img src="/images/working-with-tables-2.png" />
+</Frame>
+
+_Elk rij-/kolomcombinatie verwijst naar een corresponderende celwaarde._
+
+Hoewel er geen maximumaantal kolommen is, is er een limiet aan het totale aantal tokens dat in elke rij van de tabel kan worden opgenomen. Als je dat overschrijdt, zal de training resulteren in een fout. Vanaf maart 2024 is het maximumaantal tokens per rij ongeveer 8000 tokens (dit getal omvat JSON-code die geen celwaarden bevat maar gebruikt wordt om de tabelstructuur weer te geven, dus het daadwerkelijke maximum gereserveerd voor celwaarden is lager en hangt af van de lengtes van de kolom- en rijtitels).
+
+Als je gegevens overeenkomen met het bovenstaande formaat, kun je doorgaan met het uploaden van je tabel naar Chatwize als trainingsbron. Ga hiervoor eenvoudigweg naar Sources -> Add Sources -> Tables:
+
+<Frame>
+  <img src="/images/working-with-tables-3.png" />
+</Frame>
+
+Voor rij-/kolomtabel, nadat je deze hebt geüpload, selecteer je de tabel en ga je naar het driepuntjes-menu aan de meest rechterkant en klik je op “Edit Table Data”:
+
+<Frame>
+  <img src="/images/working-with-tables-4.png" />
+</Frame>
+
+Klik vervolgens in het tabelbewerkingsvenster op “Row-Column Header” en klik op “Save Changes”. Dit zorgt ervoor dat je gegevens correct worden voorbewerkt voor LLM-inzicht.
+
+<Frame>
+  <img src="/images/working-with-tables-5.png" />
+</Frame>
+
+Je kunt de tabellen vervolgens instellen als gerefereerde gegevens bij het toewijzen van de kennisbasis aan je Agents.
+
+Houd er rekening mee dat, op basis van onze ervaring, de GPT-4-serie aanzienlijk beter presteert dan de GPT-3.5-serie in retrieval-accuratesse en consistentie bij het werken met tabellen.
+
+<Frame>
+  <img src="/images/working-with-tables-6.png" />
+</Frame>
+
+_Voorbeeld van LLM-retrieval met behulp van de bovenstaande voorbeeldtabellen._
+
+## Mijn Agent of chatbot lijkt mijn tabel niet correct te begrijpen of te interpreteren!
+
+Grote taalmodellen (LLMs) zoals GPT-4 zijn buitengewoon bedreven in het werken met ongestructureerde tekstgegevens. Met een multimodale trainingsmethode kunnen LLMs zelfs visuele of beeldgegevens interpreteren en associëren met natuurlijke taal (zoals GPT-Vision). Echter, getabelleerde gegevens zijn heel anders. Er is geen universele set regels of standaardtaalpatronen als het gaat om het weergeven van gestructureerde informatie. Gezien de probabilistische aard van LLMs zijn ze van nature niet begaafd in het direct verwerken van dit type gegevens.
+
+Een artikel van [Microsoft Research](https://www.microsoft.com/en-us/research/blog/improving-llm-understanding-of-structured-data-and-exploring-advanced-prompting-methods/) heeft recent de prestaties van GPT-4 geëvalueerd bij het verwerken van gestructureerde gegevens. Hierin worden de modelprestaties besproken tegen talrijke programmatische representaties van gestructureerde gegevens.
+
+<Frame>
+  <img src="/images/working-with-tables-7.png" />
+</Frame>
+
+_Vergelijking van GPT-3.5 vs. GPT-4 prestaties over een verscheidenheid aan tabelbewerkingen en representaties van gestructureerde gegevens._  
+_Source: https://www.microsoft.com/en-us/research/blog/improving-llm-understanding-of-structured-data-and-exploring-advanced-prompting-methods/_
+
+Chatwize gebruikt momenteel een versie van JSON om tabellen te verwerken. Hoewel het niet perfect is, ondersteunt het een beperkt aantal use-cases wanneer bot-makers chatbots willen trainen met gestructureerde gegevens.
+
+We begrijpen dat veel use-cases veel grotere en complexere datasets betreffen die zelfs in real-time kunnen worden bijgewerkt. De statische tabelfunctie binnen Chatwize is hier niet voor geoptimaliseerd, en we raden je in plaats daarvan aan om te kijken naar function-calling.
+
+De meest robuuste en "legitieme" manier om retrieval augmented generation (RAG) toe te passen op gestructureerde gegevens is via function calling, waarbij je aangepaste functies ontwerpt en host met **gesjabloneerde** SQL-query's om specifieke gegevensfragmenten op te halen en deze naar je Chatwize-chatbot te voeren als aanvullende RAG-context on-demand. Dit vereist echter wel wat programmering en serverhosting aan jouw kant. We werken aan enkele concrete voorbeelden van deze setup, dus we waarderen je geduld terwijl we onze documentatie verbeteren.

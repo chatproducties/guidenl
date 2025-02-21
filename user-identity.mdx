@@ -1,0 +1,117 @@
+--- 
+title: User Identity Verification
+---
+Deze handleiding zal je stap voor stap begeleiden bij het implementeren van een robuust authenticatiesysteem binnen je chatbot.
+
+## Stap 1: Schakel Gebruikersidentiteit In
+
+Om het proces van gebruikersidentiteitsverificatie te starten, moet je deze functie eerst inschakelen in de instellingen van je chatbot. Dit kan gedaan worden via de chatbot-instellingen in de "User Identity Verification" sectie.
+
+Zodra de User Identity Verification is ingeschakeld, is je chatbot uitgerust om automatisch te controleren op user tokens. Dit betekent dat elke keer wanneer een gebruiker probeert te communiceren met de chatbot, hun identiteits-token wordt gecontroleerd op authenticiteit.
+
+<Frame>
+  <img src="/images/user-identity-1.png" />
+</Frame>
+
+## Stap 2: API-eindpunt
+
+### Het Instellen van het API-eindpunt
+
+Het is essentieel om een API-eindpunt op te zetten dat de verificatie van user tokens afhandelt. Dit eindpunt moet geconfigureerd zijn om POST-verzoeken te accepteren.
+
+1. **Specificeer het API-eindpunt:** Geef in de instellingen van je chatbot de URL op van het API-eindpunt. Dit is het serveradres waar de token verificatieverzoeken naartoe worden gestuurd.
+
+2. **Configureer voor POST-verzoeken:** Zorg ervoor dat je API-eindpunt is geconfigureerd om POST-verzoeken af te handelen. Dit is cruciaal, aangezien Chatwize tokengegevens via POST-verzoeken zal verzenden voor verificatie.
+
+<Frame>
+  <img src="/images/user-identity-2.png" />
+</Frame>
+
+### Verificatieproces
+
+Dit gebeurt er elke keer wanneer een chat wordt gestart:
+
+1. **Tokenverzending:** Telkens wanneer een chat wordt weergegeven, stuurt Chatwize automatisch een verificatieverzoek naar het opgegeven API-eindpunt. Dit verzoek bevat het token van de gebruiker.
+
+2. **Verwerken van het Verzoek:** Je API-eindpunt dient dit verzoek te verwerken en de geldigheid van het token te verifiëren.
+
+3. **Afhandelingsresultaat:**
+
+   - **Succesvolle Verificatie:** Als het token succesvol wordt geverifieerd, zal de chatbot de geauthenticeerde gebruiker toestaan om door te gaan met de chat.
+   - **Mislukte Verificatie:** Als de API een fout retourneert (wat wijst op een mislukte verificatie), wordt de authenticatie als onsuccesvol beschouwd. De gebruiker wordt dan doorgestuurd naar een foutscherm.
+
+## Stap 3: Sla Gebruikersgegevens Op
+
+Om de functionaliteit van het gebruikersidentiteitsverificatieproces te verbeteren en om een overzicht van gebruikersinteracties bij te houden, heb je de mogelijkheid om de gegevens van succesvolle verificatiereacties op te slaan.
+
+<Frame>
+  <img src="/images/user-identity-3.png" />
+</Frame>
+
+Elke keer wanneer een gebruiker succesvol wordt geauthenticeerd, wordt de response van het verificatieproces (meestal inclusief gebruikersidentificatiegegevens) opgeslagen.
+
+Deze gegevens worden niet geïsoleerd opgeslagen, maar gekoppeld aan de specifieke chatgesprekken.
+
+<Warning>
+  **Alleen Geldige JSON-gegevens Geaccepteerd** - Zorg ervoor dat alle gegevens die voor opslag worden aangeleverd in geldig JSON-formaat zijn. Niet-JSON of ongeldige JSON-gegevens worden automatisch genegeerd en niet opgeslagen in de gespreksgeschiedenis.
+</Warning>
+
+Voorbeeld van geldige JSON:
+
+```json
+{
+  "userId": "12345",
+  "userName": "JohnDoe",
+  "email": "johndoe@example.com",
+  "verified": true,
+  "roles": ["user", "admin"],
+  "profile": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "age": 30
+  }
+}
+```
+
+## Stap 4: Je Token Invoegen in de Chatwize Chatbot
+
+### Chat Widget
+
+Binnen het script van je webpagina waar de chatbot is geïntegreerd, zoek je het **GPTTConfig** object. Hier, moet je de **token** property bijwerken met een aangepast token. Hier is een voorbeeldscript:
+
+```html
+<script>
+  window.GPTTConfig = {
+      uuid: "15b1f07cd591476c94c210779a6c3c19",
+      token: <"Custom token">
+  }
+</script>
+<script src="https://app.chatwize.ai/widget-asset.min.js" defer></script>
+```
+
+Je kunt het **GPTTConfig** object ook direct bijwerken met je token via een **JavaScript**-aanroep. Deze methode is bijzonder handig als je het token dynamisch moet bijwerken op basis van gebruikersinteracties of andere triggers binnen je applicatie. Hier is hoe je dat doet:
+
+```JavaScript
+  window.GPTTConfig.token = "Custom token";
+```
+
+Wanneer een wijziging in de token property wordt gedetecteerd, start ons systeem een poging om de gebruiker te authenticeren op basis van de nieuwe tokenwaarde. Dit zorgt ervoor dat de identiteit van de gebruiker wordt geverifieerd elke keer dat zij interactie hebben met de chatbot.
+
+### Iframe
+
+Je kunt het gebruikers-token direct doorgeven binnen een iframe door het op te nemen in de URL-property. Voeg de **token** parameter toe aan de **URL** in het src attribuut, waarbij je **custom_token** vervangt door de daadwerkelijke tokenwaarde. Hier is een voorbeeld:
+
+```html
+<iframe
+  src="https://app.chatwize.ai/widget/162223v?token=<custom_token>"
+  width="100%"
+  height="500px"
+  frameborder="0"
+></iframe>
+```
+
+Als het nodig is om het token te wijzigen, update dan eenvoudig het src attribuut van het iframe met de nieuwe tokenwaarde.
+
+Na het bijwerken van het token in de URL, zal het iframe opnieuw laden, zodat het nieuwe token voor authenticatie wordt gebruikt.
+
+Gefeliciteerd! Je hebt nu succesvol de setup van de User Identity Verification feature voor je Chatwize Chatbot voltooid. Door de stappen in deze handleiding te volgen, heb je een robuuste en veilige methode ingeschakeld voor het authenticeren van gebruikers, wat zorgt voor een veilige en betrouwbare gebruikerservaring.

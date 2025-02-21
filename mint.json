@@ -1,0 +1,128 @@
+{
+  "name": "Chatwize API",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg",
+    "href": "https://chatwize.ai"
+  },
+  "favicon": "/logo/favicon.png",
+  "colors": {
+    "primary": "#2E3F51",
+    "light": "#516F90",
+    "dark": "#0D001D",
+    "background": {
+      "dark": "#111827"
+    },
+    "anchors": {
+      "from": "#ED727B",
+      "to": "#F6B7BB"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:info@chatwize.ai"
+    }
+  ],
+  "primaryTab": {
+    "name": "Documentation"
+  },
+  "anchors": [
+    {
+      "name": "API References",
+      "icon": "code",
+      "url": "api-reference"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "creating-first-chatbot",
+        "lead-collection",
+        "human-support-escalation",
+        "inbox-notifications",
+        "conversation-labeling",
+        "background-agents",
+        "multi-agents-chatbot",
+        "fine-tuning-agent-intents",
+        "supervisor-overrides",
+        "byok-pricing-guide",
+        "working-with-tables",
+        "best-practices",
+        "help"
+      ]
+    },
+    {
+      "group": "Function Calling",
+      "pages": ["rag-from-external-data-provider"]
+    },
+    {
+      "group": "API",
+      "pages": [
+        "api-key",
+        "api-usage-example-chatbot",
+        "api-usage-example-source",
+        "api-usage-example-chat"
+      ]
+    },
+    {
+      "group": "Authentication Webhook",
+      "pages": ["user-identity"]
+    },
+    {
+      "group": "Chatbots",
+      "pages": [
+        "api-reference/chatbots/properties-reference",
+        "api-reference/chatbots/create",
+        "api-reference/chatbots/update",
+        "api-reference/chatbots/fetch",
+        "api-reference/chatbots/fetch_multi",
+        "api-reference/chatbots/delete"
+      ]
+    },
+    {
+      "group": "Chatbot Sessions",
+      "pages": [
+        "api-reference/sessions/properties-reference",
+        "api-reference/sessions/create",
+        "api-reference/sessions/fetch",
+        "api-reference/sessions/fetch_multi"
+      ]
+    },
+    {
+      "group": "Session Messages",
+      "pages": [
+        "api-reference/messages/properties-reference",
+        "api-reference/messages/create",
+        "api-reference/messages/fetch_multi",
+        "api-reference/messages/delete",
+        "api-reference/messages/delete_multi"
+      ]
+    },
+    {
+      "group": "Data Sources",
+      "pages": [
+        "api-reference/data-sources/properties-reference",
+        "api-reference/data-sources/create-file",
+        "api-reference/data-sources/create-qa",
+        "api-reference/data-sources/create-url",
+        "api-reference/data-sources/update",
+        "api-reference/data-sources/fetch_multi",
+        "api-reference/data-sources/delete",
+        "api-reference/data-sources/delete_multi"
+      ]
+    }
+  ],
+  "api": {
+    "baseUrl": "https://app-chatwize.com/api",
+    "auth": {
+      "method": "bearer"
+    }
+  },
+  "openapi": "https://app-chatwize.com/api/apidoc/openapi.json"
+}

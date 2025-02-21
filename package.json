@@ -1,0 +1,16 @@
+{
+  "name": "chatwize",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "mintlify dev",
+    "postinstall": "npm install --include=optional sharp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "sharp": "^0.33.2",
+    "mintlify": "latest"
+  }
+}
