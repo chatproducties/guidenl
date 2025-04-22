@@ -1,6 +1,6 @@
 ---
 title: "Upload a File"
-api: "POST https://app-chatwize.com/api/v1/chatbot/{uuid}/data-source/upload"
+api: "POST https://app.chatwize.ai/api/v1/chatbot/{uuid}/data-source/upload"
 description: "Create a File source for a chatbot specified by chatbot uuid"
 ---
 
@@ -28,7 +28,7 @@ description: "Create a File source for a chatbot specified by chatbot uuid"
 <RequestExample>
 
 ```bash Curl
-curl -X POST -F "file=@{file_path}" https://app-chatwize.com/api/v1/chatbot/{uuid}/data-source/upload \
+curl -X POST -F "file=@{file_path}" https://app.chatwize.ai/api/v1/chatbot/{uuid}/data-source/upload \
 --header 'Authorization: Bearer <token>' \
 ```
 
@@ -38,7 +38,7 @@ import os
 
 file_path = '{file_path}'
 
-api_url = 'https://app-chatwize.com/api/v1/chatbot/{uuid}/data-source/upload'
+api_url = 'https://app.chatwize.ai/api/v1/chatbot/{uuid}/data-source/upload'
 
 file_name = os.path.basename(file_path)
 
@@ -60,7 +60,7 @@ const axios = require("axios");
 
 const filePath = "{file_path}";
 const apiUrl =
-  "https://app-chatwize.com/api/v1/chatbot/{uuid}/data-source/upload";
+  "https://app.chatwize.ai/api/v1/chatbot/{uuid}/data-source/upload";
 
 const fileName = filePath.split("/").pop();
 
