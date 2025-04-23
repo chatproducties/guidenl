@@ -1,5 +1,6 @@
 ---
 title: "Fijn Afstemmen van Agent Intents"
+description: "Leer in Fijn Afstemmen van Agent Intents hoe je binnen Chatwize de juiste AI Agent koppelt aan gebruikersvragen voor maximale nauwkeurigheid."
 ---
 
 Wanneer je chatbot meerdere AI Agents heeft, wijst de AI Supervisor automatisch de meest geschikte Agent toe om de gebruikersvraag af te handelen. Dit gebeurt door eerst de intentie van de gebruiker te bepalen en vervolgens de meest geschikte Agent te zoeken op basis van de naam en beschrijving van de Agents.
@@ -13,13 +14,13 @@ Wanneer AI Agents worden aangemaakt of aangepast, genereren we automatisch een a
 Ga naar het tabblad **AI Agents** in het linkermenu en klik vervolgens op **AI Supervisor Settings**.
 
 <Frame>
-  <img src="/images/finetuning1.jpg" />
+  ![](/images/finetuning1.jpg)
 </Frame>
 
 Navigeer naar het tabblad **Intents**.
 
 <Frame>
-  <img src="/images/finetuning2.jpg" />
+  ![](/images/finetuning2.jpg)
 </Frame>
 
 Hier zie je de intenties die automatisch zijn gegenereerd op basis van de interpretatie van de AI Supervisor. Wanneer een gebruiker een vraag stelt en er meerdere actieve Agents zijn ingesteld, zal de AI Supervisor de intentie extraheren en de meest passende Agent selecteren.
@@ -29,13 +30,13 @@ Hier zie je de intenties die automatisch zijn gegenereerd op basis van de interp
 Selecteer de Agent die je wilt aanpassen en klik op **"Add intent"**.
 
 <Frame>
-  <img src="https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-7.png" />
+  ![](https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-7.png)
 </Frame>
 
 Specificeer de intentie en voeg enkele voorbeeldvragen toe die gebruikers kunnen invoeren om deze intentie aan te geven.
 
 <Frame>
-  <img src="https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-8.png" />
+  ![](https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-8.png)
 </Frame>
 
 Klik op **Create**. De intentie wordt toegevoegd onder **Fixed Intents**. Mogelijk moet je naar beneden scrollen om de volledige lijst te zien.
@@ -45,7 +46,7 @@ Klik op **Create**. De intentie wordt toegevoegd onder **Fixed Intents**. Mogeli
 Open het menu met de drie stippen naast de intentie en selecteer **Edit**. Nadat je de bewerkingen opslaat, wordt de intentie verplaatst naar de **Fixed Intents** sectie.
 
 <Frame>
-  <img src="https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-9.png" />
+  ![](https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-9.png)
 </Frame>
 
 <Note>
@@ -79,7 +80,7 @@ Dit minimaliseert overlapping tussen Agents en zorgt ervoor dat alle mogelijke g
 Tijdens het gebruik van je chatbot is het belangrijk om binnenkomende gesprekken te monitoren en te identificeren wanneer een verkeerde Agent is geselecteerd. Hiervoor kun je **Debug Mode** inschakelen. Wanneer meerdere Agents actief zijn, toont deze modus de "Intent" en "Active Agent" bij elke gebruikersvraag.
 
 <Frame>
-  <img src="https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-10.png" />
+  ![](https://mintlify.s3.us-west-1.amazonaws.com/paladinmaxinc/images/fine-tuning-agent-intents-10.png)
 </Frame>
 
 Als een verkeerde Agent is toegewezen, kun je snel de intentie en bijbehorende gebruikersvraag toevoegen aan de correcte Agent binnen **AI Supervisor Settings → Intents**. Dit zorgt ervoor dat toekomstige soortgelijke vragen correct worden geclassificeerd en gerouteerd.
