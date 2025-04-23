@@ -1,5 +1,6 @@
 ---
-title: Best practices voor het voorbereiden van trainingsgegevens
+title: "Best practices voor het voorbereiden van trainingsgegevens"
+description: "Best practices voor het voorbereiden van trainingsgegevens – optimaliseer de prestaties van je Chatwize chatbot met heldere en schone data."
 ---
 
 De nauwkeurigheid en consistentie van je chatbot hangt af van een aantal factoren:
@@ -8,7 +9,7 @@ De nauwkeurigheid en consistentie van je chatbot hangt af van een aantal factore
 - Keuze van het Large Language Model (LLM)
 - Duidelijkheid van de basisprompt
 
-LLM's, zoals alle statistische modellen, hebben trainingsgegevens nodig tijdens hun constructie. In de AI-onderzoekswereld wordt vaak gezegd: "Je model is slechts zo goed als je trainingsgegevens". 
+LLM's, zoals alle statistische modellen, hebben trainingsgegevens nodig tijdens hun constructie. In de AI-onderzoekswereld wordt vaak gezegd: "Je model is slechts zo goed als je trainingsgegevens".
 
 De beste manier om de prestaties van je chatbot te optimaliseren, is door de trainingsgegevens op te schonen. In de volgende sectie geven we enkele best practices voor het structureren van je trainingsgegevens.
 
@@ -31,20 +32,20 @@ Een andere bron van fouten komt voort uit de inhoud van de chunks zelf. Idealite
 Deze fout is vooral merkbaar bij websites. Aangezien webbrowsers websites anders renderen dan hoe een webscraper ze ziet, kan wat jij ziet heel anders zijn dan wat onze scraper vastlegt. Bovendien gaan de meeste lay-outinformatie en gegevens die zich in afbeeldingen, illustraties en video's bevinden, verloren tijdens het scrapingproces.
 
 <Frame>
-  <img src="/images/best-practices-1.png" />
+  ![](/images/best-practices-1.png)
 </Frame>
 
-_Chatwize’s eigen prijstabel op https://Chatwize.ai/pricing zoals weergegeven in de Chrome-browser._
+[_Chatwize’s eigen prijstabel op https://Chatwize.ai/pricing zoals weergegeven in de Chrome-browser._](https://Chatwize.ai/pricing)
 
 <Frame>
-  <img src="/images/best-practices-2.png" />
+  ![](/images/best-practices-2.png)
 </Frame>
 
 _Dezelfde website-inhoud, nadat onze scraper deze heeft vastgelegd en chunking is toegepast._
 
 ## Geen hiaten, geen overlappingen
 
-RAG vertrouwt op het dynamisch ophalen van een subset referentiegegevens uit de volledige verzameling trainingsmateriaal. 
+RAG vertrouwt op het dynamisch ophalen van een subset referentiegegevens uit de volledige verzameling trainingsmateriaal.
 Om te bepalen welke chunks de meest relevante informatie bevatten, ondergaat de gebruikersvraag hetzelfde embeddingproces als de chunks zelf. Vervolgens berekenen we een relevantiescore voor elke chunk op basis van de nabijheid van hun embeddingvectoren ten opzichte van de invoer van de gebruiker (cosinusafstand). Daarna worden de chunks gerangschikt en kiest ons algoritme de top _n_ chunks die passen binnen het gereserveerde tokenvenster van het geselecteerde LLM.
 
 Aangezien het algoritme probeert zoveel mogelijk relevante chunks te ontdekken en in te passen, bestaat de mogelijkheid dat chunks met semantisch vergelijkbare, maar feitelijk inconsistente informatie tegelijkertijd worden geïnjecteerd in de referentiecontext van de LLM-aanroep.

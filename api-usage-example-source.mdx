@@ -1,5 +1,6 @@
 ---
-title: Gegevensbronnen uploaden
+title: "Gegevensbronnen uploaden"
+description: "Gegevensbronnen uploaden naar je chatbot via de Chatwize API – volg deze gids om snel te starten met het toevoegen van data."
 ---
 
 In deze gids leggen we stap voor stap uit hoe je gegevensbronnen kunt uploaden naar je chatbot met behulp van de Chatwize API.
@@ -15,7 +16,9 @@ Voordat je begint, zorg ervoor dat je het volgende hebt:
 
 Het API-eindpunt voor het uploaden van gegevensbronnen naar je chatbot is: `https://app.chatwize.ai/api/v1/chatbot/{uuid}/data-source/url`.
 
-<Warning>Zorg ervoor dat je `{uuid}` vervangt door de UUID van je chatbot.</Warning>
+<Warning>
+  Zorg ervoor dat je `{uuid}` vervangt door de UUID van je chatbot.
+</Warning>
 
 ## Request Body
 
@@ -33,7 +36,9 @@ Om een gegevensbron te uploaden, moet je een POST-verzoek sturen naar het API-ei
 
 Hieronder staan voorbeeldcommando's om een chatbot te maken met de Chatwize API:
 
-<Warning>Vervang **token** door je daadwerkelijke API-sleutel.</Warning>
+<Warning>
+  Vervang **token** door je daadwerkelijke API-sleutel.
+</Warning>
 
 <CodeGroup>
 
@@ -45,6 +50,7 @@ curl --location --request POST 'https://app.chatwize.ai/api/v1/chatbot/{uuid}/da
   "url": "string"
 }'
 ```
+
 
 ```py Python
 import requests
@@ -72,6 +78,7 @@ else:
     print("Verzoek mislukt met statuscode:", response.status_code)
     print(response.text)
 ```
+
 
 ```ts JavaScript
 const axios = require('axios');
@@ -102,4 +109,4 @@ axios.post(url, data, { headers, params })
 
 </CodeGroup>
 
-Dat is het! Je hebt nu geleerd hoe je gegevensbronnen kunt uploaden naar je chatbot met behulp van de Chatwize API.
+Dat is het\! Je hebt nu geleerd hoe je gegevensbronnen kunt uploaden naar je chatbot met behulp van de Chatwize API.
