@@ -1,22 +1,21 @@
---- 
-title: Multi-Agents Chatbot
+---
+title: "Multi-Agents Chatbot"
+description: "Multi-Agents Chatbot in Chatwize: laat meerdere AI Agents samenwerken in een krachtige no-code omgeving voor slimme workflow-automatisering."
 ---
 
-#
 
 Chatwize is het eerste en krachtigste no-code AI Chat framework dat een multi-agent architectuur implementeert. Meerdere AI Agents werken samen in een gecoördineerde orkestratie om geavanceerde workflow-automatiseringen mogelijk te maken.
 
 <Frame>
-  <img src="/images/12312.png" />
+  ![](/images/12312.png)
 </Frame>
 
 We presenteren deze handleiding om je te helpen begrijpen hoe onze Agents samenwerken, en om je enkele best practices te delen met betrekking tot het ontwerpen van een multi-agent chatbot.
 
 Alle Agents hebben twee toestanden:
 
-* **Actief:** Agent is “Connected”. Hij is live en actief.
-
-* **Inactief:** Agent is “Disabled”. Hij doet niets.
+- **Actief:** Agent is “Connected”. Hij is live en actief.
+- **Inactief:** Agent is “Disabled”. Hij doet niets.
 
 Slechts één enkele Agent communiceert op enig moment met de gebruiker. Onze AI Supervisor werkt op de achtergrond, in realtime, om te beslissen welke Agent de vraag van de gebruiker verwerkt wanneer deze binnenkomt.
 
@@ -24,12 +23,11 @@ Agents zijn volledig geïsoleerd van elkaar. Dit betekent dat je Agent B niet ku
 
 De AI Supervisor wijst gebruikersvragen toe aan AI Agents op basis van de Agent beschrijving. Dit betekent dat als je slechts één AI Agent hebt, je geen zeer uitgebreide beschrijving nodig hebt. Maar als je met meerdere AI Agents werkt, moet je een zo expliciet mogelijke beschrijving opstellen.
 
-* Agent Beschrijving - Wat voor taken moet de Agent uitvoeren?
-
-* Agent Prompt - Hoe moet de Agent zijn taken uitvoeren?
+- Agent Beschrijving - Wat voor taken moet de Agent uitvoeren?
+- Agent Prompt - Hoe moet de Agent zijn taken uitvoeren?
 
 <Frame>
-  <img src="/images/213213.png" />
+  ![](/images/213213.png)
 </Frame>
 
 De beschrijving van de AI Agent is anders dan de Prompt. De beschrijving moet de AI Supervisor vertellen wat de Agent op hoofdlijnen is ontworpen te doen, met de nadruk op het type gebruikersvragen dat hij moet afhandelen. De Prompt is een set instructies die de AI Agent vertellen hoe hij zich moet gedragen.
@@ -44,33 +42,24 @@ Hier zijn enkele voorbeelden van goede Agent beschrijvingen:
 
 Belichaam de rol van “Chatwize Expert,” een gespecialiseerde gids voor Chatwize. Je voornaamste doel is om gebruikers te helpen met het beantwoorden van Chatwize-gerelateerde vragen over:
 
-* Use cases
-
-* Functies en mogelijkheden
-
-* Databeveiliging
-
-* Prijzen
-
-* AI Agents en multi-agent architectuur
-
-* Gebruikersidentiteitsverificatie
-
-* Chunk curation
-
-* Function calling
-
-* Partnership programma
-
-* Custom domains
-
-* Tokens
+- Use cases
+- Functies en mogelijkheden
+- Databeveiliging
+- Prijzen
+- AI Agents en multi-agent architectuur
+- Gebruikersidentiteitsverificatie
+- Chunk curation
+- Function calling
+- Partnership programma
+- Custom domains
+- Tokens
 
 Alle intenties die door deze Agent worden afgehandeld, moeten gerelateerd zijn aan Chatwize.
 
 ## **Product Expert**
 
 De Product Expert behandelt alle gebruikersvragen met betrekking tot de producten van Example Company. Dit omvat vragen over:
+
 - Productbeschikbaarheid
 - Productspecificaties
 - Prijs
@@ -83,10 +72,10 @@ De Product Expert behandelt alle gebruikersvragen met betrekking tot de producte
 
 De Order Status Assistant behandelt alle gebruikersvragen met betrekking tot de status van een bestelling. Dit omvat vragen over:
 
-* Tracking van het pakket
-* Huidige locatie van het pakket
-* Geschatte levertijd
-* Compensatie bij late levering
+- Tracking van het pakket
+- Huidige locatie van het pakket
+- Geschatte levertijd
+- Compensatie bij late levering
 
 Wat maakt een goed ontwerp voor een multi-agent chatbot? Hoe zorg ik ervoor dat al mijn gebruikersintenties door de juiste Agent worden afgehandeld?
 
@@ -96,14 +85,13 @@ Aan de oppervlakte zullen je gebruikers niet merken dat ze met meerdere AI Agent
 
 In ons AI Supervisor routing-ontwerp gebruiken we een algoritme dat de latentie balanceert met de prestaties. Het zal niet altijd 100% nauwkeurig zijn, maar je kunt behoorlijk dicht in de buurt komen als je je chatbots effectief ontwerpt.
 
-[​](https://guide.chatwize.ai/multi-agents-chatbot#debugging-the-chatbot)
+## [​](https://guide.chatwize.ai/multi-agents-chatbot#debugging-the-chatbot)
+
 Debugging the chatbot
----------------------
 
 Als je merkt dat de chatbot niet reageert zoals je verwacht, kunnen er twee oorzaken zijn.
 
 1. De verkeerde Agent is mogelijk toegewezen om de binnenkomende gebruikersvraag af te handelen.
-
 2. De Agent zelf is mogelijk niet optimaal geconfigureerd.
 
 Om te achterhalen of jouw beoogde Agent is geselecteerd om de vraag van de gebruiker af te handelen, ga je naar “Inbox” en schakel je de debugmodus in. Zet deze hier aan:
@@ -117,7 +105,7 @@ Als de Agent die de gebruikersvraag heeft afgehandeld niet de juiste was, kun je
 Als de juiste Agent de gebruikersvraag heeft afgehandeld maar de reactie niet is wat je verwachtte, ligt het probleem bij de Agent zelf. Je zult dan de Agent configuratie moeten bijwerken. De meest directe manier om een reactie te corrigeren is door het antwoord van de AI direct aan te passen:
 
 <Frame>
-  <img src="/images/321321.png" />
+  ![](/images/321321.png)
 </Frame>
 
 Dit zorgt ervoor dat de chatbot elke keer dat dezelfde vraag in de toekomst wordt gesteld (ervan uitgaande dat dezelfde Agent is gekozen) een antwoord genereert op basis van jouw aanpassingen.

@@ -1,5 +1,6 @@
---- 
-title: RAG from an External Data Provider
+---
+title: "RAG from an External Data Provider"
+description: "RAG from an External Data Provider in Chatwize laat je AI Agents real-time data ophalen via function calling, met een voorbeeld op basis van de Semantic Scholar API."
 ---
 
 Het uploaden van statische bronnen als trainingsdata voor je AI Agents is prima, maar wat als je database enorm is, gestructureerd, extern gehost, of in real-time wordt bijgewerkt? Er is geen manier om de hele database in Chatwize’s statische kennisbibliotheek te dumpen en toch een live koppeling te behouden…
@@ -13,7 +14,7 @@ Allereerst heb je een API-sleutel nodig van je externe databron, wie dat ook mag
 Aangezien we onze LLM-queryresponse willen verrijken met relevante informatie uit academisch onderzoek, moeten we het juiste API-eindpunt vinden om de zoekopdracht uit te voeren. Semantic Scholar biedt daarvoor mooie [documentatie](https://api.semanticscholar.org/api-docs/graph#tag/Paper-Data/operation/get_graph_paper_relevance_search) in dat opzicht.
 
 <Frame>
-  <img src="/images/fc-external-database-api-1.png" />
+  ![](/images/fc-external-database-api-1.png)
 </Frame>
 
 Dus, wat geeft dit API-eindpunt als antwoord?
@@ -123,7 +124,7 @@ We voerden onze eigen analyse uit voor dit specifieke API-eindpunt (met de speci
 Nu we weten wat de LLM zal zien als extra context die door de functieaanroep wordt geleverd, kunnen we beginnen met het koppelen ervan aan onze Chatwize Agent.
 
 <Note>
-Het is ALTIJD aan te raden om je eigen script te schrijven en de output van het API-eindpunt eerst te testen. Je wilt precies weten wat voor soort informatie aan je AI Agent wordt gevoed.
+  Het is ALTIJD aan te raden om je eigen script te schrijven en de output van het API-eindpunt eerst te testen. Je wilt precies weten wat voor soort informatie aan je AI Agent wordt gevoed.
 </Note>
 
 ## Maak en bereid de AI Agent voor
@@ -131,35 +132,35 @@ Het is ALTIJD aan te raden om je eigen script te schrijven en de output van het 
 In je chatbot binnen Chatwize moet je eerst een geschikte AI Agent creëren waaraan je deze function calling-mogelijkheid wilt toewijzen. In ons voorbeeld creëerden we “The Professor”. Vervolgens definieerden we een bijbehorende Agent-beschrijving en basisprompt.
 
 <Frame>
-  <img src="/images/fc-external-database-api-2.png" />
+  ![](/images/fc-external-database-api-2.png)
 </Frame>
 
 Voor dit voorbeeld kozen we voor het GPT-4-0125-8k Model. Je kunt onze eenvoudige prompt zien in de onderstaande screenshot.
 
 <Frame>
-  <img src="/images/fc-external-database-api-3.png" />
+  ![](/images/fc-external-database-api-3.png)
 </Frame>
 
 Vervolgens slaan we de Agent op en gaan we naar het “Knowledge” tabblad om statische RAG vanuit de eigen kennisbibliotheek van de chatbot uit te schakelen. Dit is alleen noodzakelijk als je geen trainingsdata uit de statische bronnenlijst wilt gebruiken. In ons voorbeeld hebben we toch geen trainingsdata geüpload, maar we doen dit als standaardpraktijk om de zaken netjes te houden.
 
 <Frame>
-  <img src="/images/fc-external-database-api-4.png" />
+  ![](/images/fc-external-database-api-4.png)
 </Frame>
 
-Sla de Agent op. 
+Sla de Agent op.
 
 ## Functie-instelling
 
 Ga binnen je Agent naar het “Functions” tabblad. Verander de “Response Context Limit” naar het maximum toegestane. Klik vervolgens op “Add function”.
 
 <Frame>
-  <img src="/images/fc-external-database-api-5.png" />
+  ![](/images/fc-external-database-api-5.png)
 </Frame>
 
 Hier geef je de LLM precies aan wat de functie doet en hoe deze werkt. De LLM zal dan zelf bepalen of de functie nodig is wanneer hij op de gebruiker reageert tijdens een conversatie, en deze aanroepen met de juiste parameters indien nodig.
 
 <Frame>
-  <img src="/images/fc-external-database-api-6.png" />
+  ![](/images/fc-external-database-api-6.png)
 </Frame>
 
 De functienaam en beschrijving zijn bijzonder nuttig om de AI te helpen begrijpen wat de functie doet. Zorg ervoor dat je in je eigen definitie zo expliciet mogelijk bent. De functiebeschrijving mag minder dan 1024 tekens bevatten, inclusief spaties. In ons geval schreven we het volgende:
@@ -188,21 +189,21 @@ https://api.semanticscholar.org/graph/v1/paper/search
 
 Daarna kies je de HTTP-methode. Voor ons voorbeeld gebruiken we “GET”. Het specifieke API-eindpunt dat je gebruikt, zou documentatie moeten hebben over dit onderscheid.
 
-## Vaste parameters 
+## Vaste parameters
 
 Statische (vaste) parameters blijven constant bij alle API-verzoeken. Ze zijn vooraf gedefinieerd en weerspiegelen instellingen of configuraties die niet veranderen bij elk verzoek. Bijvoorbeeld, parameters die het formaat van de response specificeren of die bepaalde functies globaal inschakelen/uitschakelen bij alle API-interacties vallen in deze categorie. De term “static” benadrukt hun onveranderlijke aard.
 
-Afhankelijk van je specifieke API-eindpunt, moet je mogelijk enkele vaste parameters toevoegen in de URL. De API die we hierboven van Semantic Scholar gebruiken, vereist geen vaste parameters. Maar als je een complexer eindpunt gebruikt zoals dit: 
+Afhankelijk van je specifieke API-eindpunt, moet je mogelijk enkele vaste parameters toevoegen in de URL. De API die we hierboven van Semantic Scholar gebruiken, vereist geen vaste parameters. Maar als je een complexer eindpunt gebruikt zoals dit:
 https://app.outscraper.com/api-docs#tag/Businesses-and-POI/paths/~1maps~1search-v3/get, dan kan je API-eindpunt vaste parameters bevatten en er als volgt uitzien:
 
 ```
 https://api.app.outscraper.com/maps/search-v3?async=false&fields=name,full_address,phone,site
 ```
 
-Merk op dat aan het einde van "https://api.app.outscraper.com/maps/search-v3" vaste parameters worden toegevoegd. Dit is waar je parameters definieert die niet veranderen wanneer de functie wordt aangeroepen. Definieer vaste parameters altijd op deze manier!
+Merk op dat aan het einde van "https://api.app.outscraper.com/maps/search-v3" vaste parameters worden toegevoegd. Dit is waar je parameters definieert die niet veranderen wanneer de functie wordt aangeroepen. Definieer vaste parameters altijd op deze manier\!
 
 <Note>
-Als je API in staat is een meer beknopte response te retourneren door bepaalde parameters te configureren (d.w.z. de API vertellen overbodige metadata in de response weg te laten), raden we je ten zeerste aan dat te doen. Dit vermindert tokensverspilling en helpt de AI de context beter te begrijpen. In het bovenstaande voorbeeld stelden we "fields=name,full_address,phone,site" specifiek in om de response te beperken zodat deze alleen naam, full_address, telefoon en site-informatie bevat - en niets anders.
+  Als je API in staat is een meer beknopte response te retourneren door bepaalde parameters te configureren (d.w.z. de API vertellen overbodige metadata in de response weg te laten), raden we je ten zeerste aan dat te doen. Dit vermindert tokensverspilling en helpt de AI de context beter te begrijpen. In het bovenstaande voorbeeld stelden we "fields=name,full_address,phone,site" specifiek in om de response te beperken zodat deze alleen naam, full_address, telefoon en site-informatie bevat - en niets anders.
 </Note>
 
 ## Headers en Authenticatie
@@ -210,7 +211,7 @@ Als je API in staat is een meer beknopte response te retourneren door bepaalde p
 Over het algemeen vereisen beveiligde, publiek toegankelijke API's authenticatie. Semantic Scholar is hier geen uitzondering op. In de Header verstrekken we onze API-sleutel. Het specifieke sleutelveld dat gebruikt wordt om je authenticatietoken te leveren, verschilt op basis van de specifieke API die je gebruikt, dus zorg ervoor dat je de documentatie van je API-provider raadpleegt. In ons voorbeeld is het sleutelveld “x-api-key”:
 
 <Frame>
-  <img src="/images/fc-external-database-api-7.png" />
+  ![](/images/fc-external-database-api-7.png)
 </Frame>
 
 ## Variabele parameters
@@ -246,9 +247,9 @@ Voor onze functie definiëren we de volgende variabele parameters:
 
 Merk op dat dit een gestructureerd JSON-formaat is. Onder het sleutelveld “type” van de gehele parameter-set plaatsen we “object”. Je moet hetzelfde doen voor de jouwe.
 
-Onder properties definieer je elke parameter samen met hun type en beschrijving. Neem bijvoorbeeld “query”. Dit heeft het type String, wat betekent dat de datatyp een vrije tekst is. Types kunnen “string”, “integer”, “boolean”, “array”, etc. zijn. De beschrijving is wat vrijer, maar ook uiterst belangrijk. Hier moet je aan de AI uitleggen wat deze parameter vertegenwoordigt. Voor zover mogelijk, geef standaardwaarden en voorbeelden van daadwerkelijke parameterwaarden wanneer de functie wordt aangeroepen. 
+Onder properties definieer je elke parameter samen met hun type en beschrijving. Neem bijvoorbeeld “query”. Dit heeft het type String, wat betekent dat de datatyp een vrije tekst is. Types kunnen “string”, “integer”, “boolean”, “array”, etc. zijn. De beschrijving is wat vrijer, maar ook uiterst belangrijk. Hier moet je aan de AI uitleggen wat deze parameter vertegenwoordigt. Voor zover mogelijk, geef standaardwaarden en voorbeelden van daadwerkelijke parameterwaarden wanneer de functie wordt aangeroepen.
 
-Probeer zo expliciet mogelijk te zijn. Onthoud dat als de AI moet raden of een parameter genaamd 'language' 'en' of 'english' als invoer moet aannemen, de kans groot is dat hij het verkeerd raadt, en zul je fouten in de output van je chatbot zien. 
+Probeer zo expliciet mogelijk te zijn. Onthoud dat als de AI moet raden of een parameter genaamd 'language' 'en' of 'english' als invoer moet aannemen, de kans groot is dat hij het verkeerd raadt, en zul je fouten in de output van je chatbot zien.
 
 Afhankelijk van de functie waarmee je werkt, kunnen de invoerparameters behoorlijk complex worden. Hieronder staat een ander voorbeeld voor het leveren van parameters aan een functie (NIET gerelateerd aan ons Semantic Scholar-voorbeeld) die een array gebruikt:
 
@@ -288,13 +289,13 @@ Voor aanvullende informatie over het ondersteunde JSON-schema, raadpleeg deze gi
 Zodra alles is ingesteld, sla je de functie op en daarna de Agent. Vervolgens kun je het testen onder het tabblad “Preview”:
 
 <Frame>
-  <img src="/images/fc-external-database-api-8.png" />
+  ![](/images/fc-external-database-api-8.png)
 </Frame>
 
 Je kunt de debugmodus inschakelen met de toggle in de rechterbovenhoek van het scherm. Hiermee kun je de output van de functie inspecteren als deze is aangeroepen tijdens de LLM-response:
 
 <Frame>
-  <img src="/images/fc-external-database-api-9.png" />
+  ![](/images/fc-external-database-api-9.png)
 </Frame>
 
 Zo eenvoudig is het: je hebt je AI Agent uitgerust met on-demand informatie van een externe databron. In de toekomst zullen we ook een handleiding schrijven die je helpt je eigen databasesearchfunctie te implementeren en te hosten, die vervolgens geïntegreerd wordt met Chatwize.
