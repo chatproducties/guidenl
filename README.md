@@ -49,7 +49,7 @@ mint broken-links
 - **Geen techniek onder de motorkap.** Geen leveranciers, modelnamen,
   architectuur of interne werking.
 - **Beveiligings- en privacyvragen** worden per klant beantwoord via
-  support@chatwize.ai.
+  hello@chatwize.ai.
 - **Noem geen getallen** voor limieten en drempels die per abonnement of per
   instelling verschillen; beschrijf het gedrag.
 
@@ -65,7 +65,7 @@ mint broken-links
   e-mailadres of klantnaam in beeld staat.
 - **Navigatie** — de `groups`/`pages`-lijsten per taal in `docs.json`.
 - **Links naar het product** — het dashboard is `https://eu.chatwize.ai`, de
-  marketingsite `https://chatwize.ai`, support is `support@chatwize.ai`.
+  marketingsite `https://chatwize.ai`, support is `hello@chatwize.ai`.
 
 ## Een pagina toevoegen
 
