@@ -1,0 +1,183 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Chatwize",
+  "description": "Handleidingen voor Chatwize: je chatbot vullen, instellen en op je website zetten.",
+  "colors": {
+    "primary": "#3A38FF",
+    "light": "#8B8AFF",
+    "dark": "#2A28C7"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
+    "href": "https://chatwize.ai"
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "en",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "en/introduction",
+              "en/how-it-works",
+              "en/quickstart"
+            ]
+          },
+          {
+            "group": "Build your chatbot",
+            "pages": [
+              "en/knowledge-base",
+              "en/ai-agent",
+              "en/widget-customization",
+              "en/data-collection",
+              "en/human-handover",
+              "en/multi-agent"
+            ]
+          },
+          {
+            "group": "Connect & install",
+            "pages": [
+              "en/installation",
+              "en/integrations"
+            ]
+          }
+        ]
+      },
+      {
+        "language": "nl",
+        "groups": [
+          {
+            "group": "Aan de slag",
+            "pages": [
+              "nl/introductie",
+              "nl/hoe-het-werkt",
+              "nl/snelstart"
+            ]
+          },
+          {
+            "group": "Bouw je chatbot",
+            "pages": [
+              "nl/kennisbank",
+              "nl/ai-agent",
+              "nl/widget-aanpassen",
+              "nl/gegevens-verzamelen",
+              "nl/medewerker-overname",
+              "nl/multi-agent"
+            ]
+          },
+          {
+            "group": "Koppelen & installeren",
+            "pages": [
+              "nl/installatie",
+              "nl/integraties"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "redirects": [
+    {
+      "source": "/introduction",
+      "destination": "/en/introduction"
+    },
+    {
+      "source": "/creating-first-chatbot",
+      "destination": "/en/quickstart"
+    },
+    {
+      "source": "/lead-collection",
+      "destination": "/en/data-collection"
+    },
+    {
+      "source": "/human-support-escalation",
+      "destination": "/en/human-handover"
+    },
+    {
+      "source": "/inbox-notifications",
+      "destination": "/en/human-handover"
+    },
+    {
+      "source": "/conversation-labeling",
+      "destination": "/en/how-it-works"
+    },
+    {
+      "source": "/multi-agents-chatbot",
+      "destination": "/en/multi-agent"
+    },
+    {
+      "source": "/fine-tuning-agent-intents",
+      "destination": "/en/multi-agent"
+    },
+    {
+      "source": "/supervisor-overrides",
+      "destination": "/en/multi-agent"
+    },
+    {
+      "source": "/byok-pricing-guide",
+      "destination": "/en/ai-agent"
+    },
+    {
+      "source": "/working-with-tables",
+      "destination": "/en/knowledge-base"
+    },
+    {
+      "source": "/best-practices",
+      "destination": "/en/knowledge-base"
+    },
+    {
+      "source": "/help",
+      "destination": "/en/knowledge-base"
+    },
+    {
+      "source": "/rag-from-external-data-provider",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/user-identity",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/api-key",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/api-usage-example-chatbot",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/api-usage-example-source",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/api-usage-example-chat",
+      "destination": "/en/integrations"
+    },
+    {
+      "source": "/api-reference/:slug*",
+      "destination": "/en/integrations"
+    }
+  ],
+  "navbar": {
+    "links": [
+      {
+        "label": "support@chatwize.ai",
+        "href": "mailto:support@chatwize.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://eu.chatwize.ai"
+    }
+  },
+  "footer": {
+    "socials": {
+      "website": "https://chatwize.ai"
+    }
+  }
+}

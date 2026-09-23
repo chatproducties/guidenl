@@ -1,0 +1,71 @@
+---
+title: "AI agent: behaviour & instructions"
+description: "Decide how your chatbot answers: instructions, tone, model level and creativity."
+---
+
+The **knowledge base** decides *what* your chatbot talks about; the **AI agent**
+decides *how* it does that.
+
+## Where to find it
+
+<Steps>
+  <Step title="Open your chatbot">
+    From **Chatbots**, click the chatbot you want to work on.
+  </Step>
+  <Step title="Open AI agent">
+    In the left sidebar, under **Main menu**, click **AI agent**.
+  </Step>
+</Steps>
+
+<Frame caption="The AI agent screen: where you create and configure your agent(s).">
+  <img src="/images/en-agent.png" alt="Chatwize AI agent page with the option to create an agent" />
+</Frame>
+
+## What you set
+
+<CardGroup cols={2}>
+  <Card title="Instructions (system prompt)" icon="scroll">
+    The standing brief for your bot: who it is, what it does and doesn't do, and
+    how it handles questions it can't answer.
+  </Card>
+  <Card title="Tone of voice" icon="comment">
+    Formal or informal, brief or expansive.
+  </Card>
+  <Card title="Model level" icon="microchip">
+    How capable the model is and how much context it carries. A higher level
+    reasons better about hard questions and costs more credits per message.
+  </Card>
+  <Card title="Creativity" icon="wand-magic-sparkles">
+    Lower = more factual and consistent. Higher = freer and more varied.
+  </Card>
+</CardGroup>
+
+<Tip>
+Be specific in your instructions about what the bot should do when it doesn't
+know, for example refer to a person or ask for an email address. That stops it
+from guessing.
+</Tip>
+
+## External lookups
+
+On this page you also set whether your agent may call an **external service**
+during a conversation, for example to fetch an order status. You specify which
+addresses it's allowed to reach. The screen shows whether your current model
+level supports it.
+
+<Warning>
+Anything your agent may call, any visitor can indirectly cause it to call. So only
+connect addresses that are safe for public use, and have the service itself check
+whether the requested data belongs to this visitor.
+</Warning>
+
+## Multiple specialists
+
+Do you have clearly different jobs (sales, support, billing)? Then you can create
+**multiple agents** within one chatbot that route to each other. See
+[Multiple agents](/en/multi-agent).
+
+## Trying it out
+
+Use **Test chatbot** in the sidebar to check your settings with real questions,
+before you go live.

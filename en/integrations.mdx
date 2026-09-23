@@ -1,0 +1,92 @@
+---
+title: "Integrations"
+description: "Set up email notifications and webhooks."
+---
+
+Notifications and collected data can flow automatically to your own inbox or
+systems. You set both up under **Settings**, in the **Forwarding &
+integrations** group.
+
+## Where to find it
+
+<Steps>
+  <Step title="Open Settings">
+    In the left sidebar, under **Manage**, click **Settings**.
+  </Step>
+  <Step title="Open the right section">
+    Scroll to the **Forwarding & integrations** group and click **Email
+    notifications** or **Webhook**.
+  </Step>
+</Steps>
+
+## Email notifications
+
+Under **recipient**, enter one email address; every notification goes there.
+Leave it empty and nothing is sent. Optionally add a **CC address**; that second
+address must be a team member or use the same email domain as your team. Then
+tick what you want to be notified about:
+
+- A visitor starts a new conversation
+- A visitor asks for a colleague
+- Someone submits the contact form
+- Data has been collected
+
+## Webhooks
+
+A webhook sends data to a URL you control the moment something happens. Point it
+at your CRM, a spreadsheet automation, or a tool like Zapier or Make to
+distribute from there.
+
+<Steps>
+  <Step title="Add a webhook">
+    In the **Webhook** section, click to add a new webhook and paste your URL.
+    You can have up to five per chatbot side by side, each with its own address,
+    its own events and its own headers.
+  </Step>
+  <Step title="Choose the events">
+    Per webhook, tick which events it should react to.
+  </Step>
+  <Step title="Save and test">
+    Save with the bar at the bottom of the page. From then on the webhook fires
+    on every chosen event.
+  </Step>
+</Steps>
+
+The events you can choose from:
+
+<CardGroup cols={2}>
+  <Card title="New conversation" icon="comment-dots">
+    A visitor starts a new conversation.
+  </Card>
+  <Card title="Message sent" icon="message">
+    A message is sent in the conversation.
+  </Card>
+  <Card title="Form submitted" icon="rectangle-list">
+    Someone submits the contact form.
+  </Card>
+  <Card title="Person requested" icon="headset">
+    A visitor asks for a colleague.
+  </Card>
+  <Card title="Data collected" icon="user-plus">
+    Variables have been collected in the conversation.
+  </Card>
+</CardGroup>
+
+<Tip>
+Which collected fields are included is set on the variables themselves, not per
+webhook: that choice applies to all webhooks together. See
+[Collecting data](/en/data-collection).
+</Tip>
+
+## Messages from external systems
+
+Want to work the other way around, and post a message into a running conversation
+from your own system? That runs through **Messages from external systems**, found
+in your chatbot's menu. It gives you the details your developer needs.
+
+## External lookups
+
+During a conversation your chatbot can call an external service to fetch live
+information, for example an order status, and use the result in its answer. You
+configure that on the **AI agent**, not in this group. See
+[AI agent](/en/ai-agent) for how to set it up and what to watch out for.

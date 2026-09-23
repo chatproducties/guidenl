@@ -1,0 +1,76 @@
+---
+title: "Gegevens verzamelen"
+description: "Leg namen, e-mailadressen en eigen gegevens vast en stuur ze door."
+---
+
+Chatwize kan informatie uit gesprekken verzamelen en doorsturen. Je stelt dit in
+onder **Instellingen**, in de groep **Gegevens verzamelen**.
+
+## Waar vind je het
+
+<Steps>
+  <Step title="Open je chatbot">
+    Klik vanuit **Chatbots** op de chatbot waaraan je wilt werken.
+  </Step>
+  <Step title="Open Instellingen">
+    Klik in de linker zijbalk, onder **Beheer**, op **Instellingen**.
+  </Step>
+  <Step title="Scroll naar Gegevens verzamelen">
+    Klik op **Contactformulier**, **Variabelen** of **Tevredenheid / feedback**
+    om die uit te klappen.
+  </Step>
+</Steps>
+
+<Frame caption="Instellingen → Gegevens verzamelen, met Contactformulier en Variabelen.">
+  <img src="/images/nl-data.png" alt="Chatwize Instellingen-pagina met de Gegevens verzamelen-secties" />
+</Frame>
+
+## Drie secties
+
+<CardGroup cols={2}>
+  <Card title="Contactformulier" icon="rectangle-list">
+    Vraag de bezoeker om gegevens (naam, e-mail) met een formulier in de chat. Je
+    bepaalt de velden, of ze verplicht zijn, en na hoeveel berichten het
+    verschijnt.
+  </Card>
+  <Card title="Variabelen" icon="list-check">
+    Bepaal welke gegevens de chatbot mag verzamelen (naam, e-mail, ordernummer, …)
+    en waar ze heen gaan.
+  </Card>
+  <Card title="Tevredenheid / feedback" icon="thumbs-up">
+    Zet duimpjes onder de antwoorden van de AI, met een optionele toelichting van
+    de bezoeker.
+  </Card>
+</CardGroup>
+
+### Variabelen automatisch laten invullen
+
+Per variabele kun je aanzetten dat de assistent 'm **zelf herkent** in het
+gesprek. Noemt een bezoeker zijn e-mailadres gewoon in een zin, dan wordt dat
+vastgelegd zonder dat je een formulier hoeft te tonen.
+
+## Waar de gegevens heen gaan
+
+Alles wat verzameld wordt staat in **Inbox → Gegevens**, met een link terug naar
+het gesprek waar het vandaan komt. Formulierinzendingen en variabelen staan daar
+bij elkaar, met een label dat laat zien waar elke invoer vandaan komt. Vanaf die
+pagina exporteer je alles naar CSV.
+
+Automatisch doorsturen doe je in de groep **Doorsturen & integraties**:
+
+- **E-mailnotificaties** — een bericht naar je eigen inbox.
+- **Webhook** — gegevens naar je CRM, spreadsheet of automatiseringstool.
+
+Zie [Integraties](/nl/integraties) voor het instellen daarvan.
+
+<Tip>
+Per kanaal kies je welke velden meegaan. Vink je één veld aan, dan wordt er
+verstuurd zodra dat binnen is; vink je er meerdere aan, dan wacht Chatwize tot ze
+er allemaal zijn. Die keuze geldt voor alle webhooks samen.
+</Tip>
+
+<Warning>
+Verzamelde gegevens komen uit wat een bezoeker zelf typt. Behandel ze als
+onvertrouwde invoer: controleer ze voordat je ze in je CRM, een factuur of een
+spreadsheet gebruikt.
+</Warning>

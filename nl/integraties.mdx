@@ -1,0 +1,92 @@
+---
+title: "Integraties"
+description: "E-mailmeldingen en webhooks instellen."
+---
+
+Meldingen en verzamelde gegevens kunnen automatisch naar je eigen inbox of
+systemen stromen. Beide stel je in onder **Instellingen**, in de groep
+**Doorsturen & integraties**.
+
+## Waar vind je het
+
+<Steps>
+  <Step title="Open Instellingen">
+    Klik in de linker zijbalk, onder **Beheer**, op **Instellingen**.
+  </Step>
+  <Step title="Open de juiste sectie">
+    Scroll naar de groep **Doorsturen & integraties** en klik op
+    **E-mailnotificaties** of **Webhook**.
+  </Step>
+</Steps>
+
+## E-mailnotificaties
+
+Vul bij **ontvanger** één e-mailadres in; daar gaan alle meldingen heen. Laat je
+het leeg, dan versturen we niets. Optioneel zet je er een **CC-adres** bij; dat
+tweede adres moet een teamlid zijn of hetzelfde e-maildomein gebruiken als je
+team. Vink daarna aan waarover je bericht wilt krijgen:
+
+- Een bezoeker begint een nieuw gesprek
+- Een bezoeker vraagt om een collega
+- Iemand vult het contactformulier in
+- Er zijn gegevens verzameld
+
+## Webhooks
+
+Een webhook stuurt gegevens naar een URL die jij beheert zodra er iets gebeurt.
+Wijs 'm naar je CRM, een spreadsheet-automatisering of een tool als Zapier of
+Make om vandaaruit verder te verdelen.
+
+<Steps>
+  <Step title="Voeg een webhook toe">
+    Klik in de sectie **Webhook** op een nieuwe webhook toevoegen en plak je URL.
+    Je kunt er maximaal vijf per chatbot naast elkaar hebben, elk met een eigen
+    adres, eigen gebeurtenissen en eigen headers.
+  </Step>
+  <Step title="Kies de gebeurtenissen">
+    Vink per webhook aan waarop hij moet reageren.
+  </Step>
+  <Step title="Bewaar en test">
+    Sla op met de balk onderaan de pagina. Vanaf dat moment vuurt de webhook bij
+    elke gekozen gebeurtenis.
+  </Step>
+</Steps>
+
+De gebeurtenissen waaruit je kunt kiezen:
+
+<CardGroup cols={2}>
+  <Card title="Nieuw gesprek" icon="comment-dots">
+    Een bezoeker begint een nieuw gesprek.
+  </Card>
+  <Card title="Bericht verstuurd" icon="message">
+    Er wordt een bericht verstuurd in het gesprek.
+  </Card>
+  <Card title="Formulier ingediend" icon="rectangle-list">
+    Iemand vult het contactformulier in.
+  </Card>
+  <Card title="Medewerker gevraagd" icon="headset">
+    Een bezoeker vraagt om een collega.
+  </Card>
+  <Card title="Gegevens verzameld" icon="user-plus">
+    Er zijn variabelen verzameld in het gesprek.
+  </Card>
+</CardGroup>
+
+<Tip>
+Welke verzamelde velden meegaan, stel je in bij de variabelen zelf en niet per
+webhook: die keuze geldt voor alle webhooks samen. Zie
+[Gegevens verzamelen](/nl/gegevens-verzamelen).
+</Tip>
+
+## Berichten van externe systemen
+
+Wil je andersom werken, en vanuit je eigen systeem een bericht in een lopend
+gesprek plaatsen? Dat kan via **Berichten van externe systemen**, te vinden in
+het menu van je chatbot. Je krijgt daar de gegevens die je developer nodig heeft.
+
+## Externe opzoekingen
+
+Je chatbot kan tijdens een gesprek een externe dienst aanroepen om live
+informatie op te halen, bijvoorbeeld een orderstatus, en het resultaat in zijn
+antwoord gebruiken. Dat stel je in bij de **AI-agent**, niet in deze groep. Zie
+[AI-agent](/nl/ai-agent) voor het instellen en de aandachtspunten.
