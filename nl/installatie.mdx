@@ -1,0 +1,113 @@
+---
+title: "Installeren op je site"
+description: "Voeg de chatwidget met één stukje code toe aan elke website."
+---
+
+Je chatbot op je website plaatsen is één script-tag. Je krijgt 'm van de pagina
+**Live zetten**.
+
+## Waar vind je het
+
+<Steps>
+  <Step title="Open je chatbot">
+    Klik vanuit **Chatbots** op de chatbot die je wilt publiceren.
+  </Step>
+  <Step title="Open Live zetten">
+    Klik in de linker zijbalk, onder **Publicatie**, op **Live zetten**.
+  </Step>
+  <Step title="Open 'Op je website'">
+    Klik op **Op je website**, vul het adres van je website in en klik op
+    **Genereer code**. Je embed-code verschijnt; kopieer 'm.
+  </Step>
+</Steps>
+
+<Frame caption="Live zetten → Op je website is waar je embed-code staat.">
+  <img src="/images/nl-install.png" alt="Chatwize Live zetten-pagina met de optie Op je website" />
+</Frame>
+
+## Je code
+
+De code ziet er zo uit, met jouw eigen sleutel op de plek van
+`wk_JOUW_WIDGETSLEUTEL`:
+
+```html
+<script src="https://eu.chatwize.ai/embed.js" data-widget-key="wk_JOUW_WIDGETSLEUTEL" defer></script>
+```
+
+<Warning>
+Gebruik de code precies zoals je 'm krijgt. De widget-sleutel hoort bij het
+website-adres dat je hebt opgegeven. Wil je de chatbot op een tweede domein
+tonen, voeg dat adres dan toe op de **Live zetten**-pagina.
+</Warning>
+
+## Waar plak je het
+
+Plak de code vlak vóór de afsluitende `</body>`-tag op elke pagina waar je de chat
+wilt laten verschijnen. Door `defer` wacht de widget tot je pagina geladen is.
+
+<AccordionGroup>
+  <Accordion title="Eigen HTML-site">
+    Voeg de code toe vóór de afsluitende body-tag in je template- of
+    lay-outbestand, zodat het op elke pagina laadt.
+  </Accordion>
+  <Accordion title="WordPress">
+    Gebruik een plugin waarmee je code in de footer kunt invoegen, of voeg het
+    toe aan het footer-template van je thema.
+  </Accordion>
+  <Accordion title="Shopify">
+    Voeg de code toe aan `theme.liquid` vóór de afsluitende body-tag in de
+    code-editor van je thema.
+  </Accordion>
+  <Accordion title="Webflow / Wix / Squarespace">
+    Gebruik het site-brede aangepaste-code- of footergedeelte in je
+    site-instellingen en plak de code daar.
+  </Accordion>
+  <Accordion title="Google Tag Manager">
+    Maak een Custom HTML-tag met de code en trigger 'm op alle pagina's.
+  </Accordion>
+</AccordionGroup>
+
+<Tip>
+Op de pagina **Live zetten** staan uitklapbare installatiegidsen per platform
+(WordPress, Shopify, Wix, Squarespace, Webflow en overig), met de stappen voor
+precies jouw site.
+</Tip>
+
+## Controleer of het werkt
+
+Open je website en zoek de chatballon in de hoek. Klik erop en stel een vraag.
+Verschijnt hij niet? Controleer of de code op de pagina staat, of het
+website-adres dat je in Chatwize invulde klopt, en leeg eventuele paginacache.
+
+## Deelbare link
+
+Liever een aparte chatpagina dan een ballon? Gebruik op **Live zetten** de
+**Deelbare link**: een directe link naar je chatbot die je kunt delen via e-mail,
+social media of een QR-code, die je daar meteen kunt downloaden. Geen website
+nodig. Wil je diezelfde chatpagina in een eigen pagina inbouwen, dan staat er
+onder de link ook een **iframe**-variant klaar.
+
+<Note>
+Er is één deelbare link per chatbot. Iedereen die de link heeft, kan met je
+chatbot praten. Raakt die op straat, dan vervang je 'm op diezelfde pagina; de
+oude link werkt dan direct niet meer.
+</Note>
+
+## Je chatbot afschermen
+
+Onder **Instellingen → Toegang & beheer** bepaal je wie de chatbot mag gebruiken
+en hoe intensief.
+
+<AccordionGroup>
+  <Accordion title="Snelheidslimiet">
+    Begrenst hoeveel vragen één bezoeker achter elkaar kan stellen. Laat dit
+    aanstaan: het houdt de chatbot beschikbaar voor gewone bezoekers en voorkomt
+    dat één iemand je verbruik opmaakt. Deel je de chatbot breed, bijvoorbeeld
+    via social media of een QR-code, kies dan een strakkere limiet.
+  </Accordion>
+  <Accordion title="Wachtwoordbeveiliging">
+    Zet een toegangscode op de chatbot, met je eigen tekst op het slotscherm.
+    Handig voor een interne chatbot, een chatbot achter een klantportaal, of een
+    chatbot die je nog aan het testen bent.
+  </Accordion>
+</AccordionGroup>

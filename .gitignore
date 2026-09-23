@@ -1,0 +1,10 @@
+node_modules
+.mintlify
+*.log
+.DS_Store
+
+# Interne notities — nooit publiceren
+INTERN-status.md
+
+# Interne werkinstructie — hoort niet in de publieke repo
+CLAUDE.md

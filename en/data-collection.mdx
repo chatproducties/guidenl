@@ -1,0 +1,73 @@
+---
+title: "Collecting data"
+description: "Capture names, email addresses and your own fields, and forward them."
+---
+
+Chatwize can collect information from conversations and forward it. You set this
+up under **Settings**, in the **Collecting data** group.
+
+## Where to find it
+
+<Steps>
+  <Step title="Open your chatbot">
+    From **Chatbots**, click the chatbot you want to work on.
+  </Step>
+  <Step title="Open Settings">
+    In the left sidebar, under **Manage**, click **Settings**.
+  </Step>
+  <Step title="Scroll to Collecting data">
+    Click **Contact form**, **Variables** or **Satisfaction / feedback** to
+    expand it.
+  </Step>
+</Steps>
+
+<Frame caption="Settings → Collecting data, with Contact form and Variables.">
+  <img src="/images/en-data.png" alt="Chatwize Settings page with the Collecting data sections" />
+</Frame>
+
+## Three sections
+
+<CardGroup cols={2}>
+  <Card title="Contact form" icon="rectangle-list">
+    Ask the visitor for details (name, email) with a form in the chat. You decide
+    the fields, whether they're required, and after how many messages it appears.
+  </Card>
+  <Card title="Variables" icon="list-check">
+    Decide which data the chatbot may collect (name, email, order number, …) and
+    where it goes.
+  </Card>
+  <Card title="Satisfaction / feedback" icon="thumbs-up">
+    Put thumbs under the AI's answers, with an optional comment from the visitor.
+  </Card>
+</CardGroup>
+
+### Letting variables fill themselves
+
+Per variable you can turn on that the assistant **recognises it itself** in the
+conversation. If a visitor simply mentions their email address in a sentence,
+it's captured without you having to show a form.
+
+## Where the data goes
+
+Everything collected sits in **Inbox → Data**, with a link back to the
+conversation it came from. Form submissions and variables are shown together,
+with a label showing where each entry came from. From that page you export
+everything to CSV.
+
+Automatic forwarding is set in the **Forwarding & integrations** group:
+
+- **Email notifications** — a message to your own inbox.
+- **Webhook** — data to your CRM, spreadsheet or automation tool.
+
+See [Integrations](/en/integrations) for how to set those up.
+
+<Tip>
+Per channel you choose which fields are included. Tick one field and it's sent as
+soon as that arrives; tick several and Chatwize waits until they're all there.
+That choice applies to all webhooks together.
+</Tip>
+
+<Warning>
+Collected data comes from what a visitor types. Treat it as untrusted input:
+check it before you use it in your CRM, an invoice or a spreadsheet.
+</Warning>
