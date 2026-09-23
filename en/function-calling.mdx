@@ -62,7 +62,7 @@ agents, give the ability to the specialist that needs it. See
 | **Allowlist host** | The hostname of that address, for example `api.example.com`. It must match the URL exactly; this is what stops the address from being pointed somewhere else later. |
 | **Parameters** | A JSON Schema describing which values the AI may fill in. Empty means the endpoint takes no parameters. |
 | **Action type** | **Read only** for a lookup, **Performs an action** for anything that changes on your side. |
-| **Automatic calling** | Only for write actions: off means the bot may try but gets told it is not enabled. |
+| **Automatic calling** | Only for write actions, and **on by default**. Switch it off and the bot may try but is told the action is not enabled. |
 | **Max. calls per conversation** | Between 1 and 50, default 5. Protects against a confused bot that keeps calling. |
 | **Headers** | Your own headers, for example `Authorization` or `X-API-Key`. |
 
@@ -167,6 +167,147 @@ That is ten lines of code in your shop, and it turns a question of trust ("does
 this visitor belong to this order?") into something your own system answers
 rather than the chatbot. Shopify and Magento work the same way: a `GET` with
 query parameters and a token in a header.
+
+## More examples
+
+Four situations that come up often, each with the schema, the call and the
+response. Open the one that looks like yours.
+
+<AccordionGroup>
+  <Accordion title="Stock lookup (webshop or wholesaler)">
+    The visitor asks whether something is in stock. One product code in, a
+    number out.
+
+    **Description:** "Returns the current stock of one product. Call this when
+    the visitor asks whether something is in stock, how many there are, or when
+    it will be back."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "product_code": {
+          "type": "string",
+          "description": "The product or SKU code as shown on the site, for example AB-1234"
+        }
+      },
+      "required": ["product_code"]
+    }
+    ```
+
+    **The call:** `GET https://api.example.com/stock?product_code=AB-1234`
+
+    ```json
+    { "in_stock": 12, "lead_time_days": 2, "expected": null }
+    ```
+
+    Return what the visitor may know, not your purchase price or your supplier.
+    Everything in this response can end up in the chat window.
+  </Accordion>
+
+  <Accordion title="Availability of a rental item">
+    The visitor wants to know whether a camper, boat or room is free in a given
+    period. Two dates in, free or not out.
+
+    **Description:** "Checks whether an item is free between two dates. Call
+    this as soon as the visitor names a period or asks whether something is
+    still available."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": ["compact", "family", "luxury"],
+          "description": "The type the visitor is asking about"
+        },
+        "from": {
+          "type": "string",
+          "description": "Start date as YYYY-MM-DD, for example 2026-07-04"
+        },
+        "until": {
+          "type": "string",
+          "description": "End date as YYYY-MM-DD, for example 2026-07-18"
+        }
+      },
+      "required": ["category", "from", "until"]
+    }
+    ```
+
+    ```json
+    { "available": true, "from_per_night": 129, "minimum_nights": 5 }
+    ```
+
+    A date arrives as text, exactly as the AI writes it. Check yourself that it
+    is a valid date and not in the past — a visitor can say "last July" and that
+    is what gets filled in.
+  </Accordion>
+
+  <Accordion title="Create a callback request (a write action)">
+    Here something changes on your side. Set **Action type** to **Performs an
+    action (write)**. Automatic calling is on by default; switch it off while you
+    are testing and the bot will be told the action is not enabled.
+
+    **Description:** "Creates a callback request. Only call this when the
+    visitor explicitly asks to be called back and has given a phone number."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name the visitor gives"
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number the visitor gives"
+        },
+        "subject": {
+          "type": "string",
+          "description": "What the call should be about, in one sentence"
+        }
+      },
+      "required": ["name", "phone"]
+    }
+    ```
+
+    **The call:** `POST https://api.example.com/callback-request` with those
+    fields as a JSON body.
+
+    ```json
+    { "created": true, "reference": "CB-2026-0912" }
+    ```
+
+    Two things about write actions. Put a brake on your own side — the same
+    number twice within an hour is one request, not two. And return a reference,
+    so the bot has something concrete to name and the visitor doesn't ask three
+    more times to be sure.
+  </Accordion>
+
+  <Accordion title="Opening hours or waiting time (no parameters)">
+    The simplest case: the bot has nothing to fill in.
+
+    **Description:** "Returns today's opening hours and whether we are open
+    right now. Call this for any question about opening hours, including 'are
+    you open now'."
+
+    ```json
+    {}
+    ```
+
+    **The call:** `GET https://api.example.com/opening-hours`
+
+    ```json
+    { "open_now": true, "today": "09:00-17:30", "tomorrow": "closed" }
+    ```
+
+    This is the best first endpoint to build: no input, no personal data,
+    nothing that can go wrong. Once this works you know the connection, the
+    signature and the description are all right.
+  </Accordion>
+</AccordionGroup>
 
 ## What your endpoint receives
 
@@ -424,7 +565,8 @@ every value that arrives as a visitor's words.
   that this visitor is entitled to this data. An endpoint that returns any order
   for any order number hands out everyone's orders.
 - **Prefer read over write.** Mark anything that changes something as **Performs
-  an action**, and only turn on automatic calling once you trust the flow.
+  an action**, and switch automatic calling off while you are still testing — it
+  is on by default.
 - **Return as little as possible.** Not the entire customer record, just the
   status the question was about.
 - **Use a separate key.** Put your own token in a header, give it read-only

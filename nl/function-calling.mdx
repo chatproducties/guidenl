@@ -62,7 +62,7 @@ meerdere agents, geef het dan aan de specialist die het nodig heeft. Zie
 | **Allowlist host** | De hostnaam van dat adres, bijvoorbeeld `api.voorbeeld.nl`. Die moet exact gelijk zijn aan de URL; dit is wat voorkomt dat het adres later ergens anders heen wijst. |
 | **Parameters die de bot mag invullen** | Een JSON-Schema met de waarden die de AI mag meesturen. Leeg betekent: dit endpoint heeft geen parameters. |
 | **Type actie** | **Alleen lezen (veilig)** voor een opzoeking, **Voert een actie uit (write)** voor alles wat bij jou iets verandert. |
-| **Automatisch uitvoeren** | Alleen bij write-acties: uit betekent dat de bot het probeert, maar te horen krijgt dat het niet is ingeschakeld. |
+| **Automatisch uitvoeren** | Alleen bij write-acties, en **standaard aan**. Zet je het uit, dan probeert de bot het wel maar krijgt hij te horen dat het niet is ingeschakeld. |
 | **Max. aanroepen per gesprek** | Tussen 1 en 50, standaard 5. Beschermt tegen een verwarde bot die blijft aanroepen. |
 | **Headers** | Je eigen headers, bijvoorbeeld `Authorization` of `X-API-Key`. |
 
@@ -167,6 +167,149 @@ Dat is tien regels code in je winkel, en het verplaatst de vertrouwensvraag
 ("hoort deze bezoeker bij deze bestelling?") van de chatbot naar je eigen
 systeem. Shopify en Magento werken hetzelfde: een `GET` met query-parameters en
 een token in een header.
+
+## Meer voorbeelden
+
+Vier situaties die vaak voorkomen, elk met het schema, de aanroep en het
+antwoord. Klap open wat op jou lijkt.
+
+<AccordionGroup>
+  <Accordion title="Voorraad opzoeken (webshop of groothandel)">
+    De bezoeker vraagt of iets op voorraad is. Eén artikelcode erin, een aantal
+    eruit.
+
+    **Beschrijving:** "Geeft de actuele voorraad van één artikel. Roep dit aan
+    als de bezoeker vraagt of iets op voorraad is, hoeveel er zijn, of wanneer
+    iets weer binnenkomt."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "artikelcode": {
+          "type": "string",
+          "description": "De artikel- of SKU-code zoals die op de site staat, bijvoorbeeld AB-1234"
+        }
+      },
+      "required": ["artikelcode"]
+    }
+    ```
+
+    **Aanroep:** `GET https://api.voorbeeld.nl/voorraad?artikelcode=AB-1234`
+
+    ```json
+    { "op_voorraad": 12, "levertijd_dagen": 2, "verwacht": null }
+    ```
+
+    Geef door wat de bezoeker mag weten, niet je inkoopprijs of je leverancier.
+    Alles in dit antwoord kan in het chatvenster belanden.
+  </Accordion>
+
+  <Accordion title="Beschikbaarheid van een verhuurobject">
+    De bezoeker wil weten of een camper, boot of zaal vrij is in een bepaalde
+    periode. Twee datums erin, vrij of niet eruit.
+
+    **Beschrijving:** "Controleert of een object vrij is tussen twee datums.
+    Roep dit aan zodra de bezoeker een periode noemt of vraagt of iets nog
+    beschikbaar is."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "categorie": {
+          "type": "string",
+          "enum": ["compact", "gezin", "luxe"],
+          "description": "Het type waar de bezoeker naar vraagt"
+        },
+        "van": {
+          "type": "string",
+          "description": "Startdatum als JJJJ-MM-DD, bijvoorbeeld 2026-07-04"
+        },
+        "tot": {
+          "type": "string",
+          "description": "Einddatum als JJJJ-MM-DD, bijvoorbeeld 2026-07-18"
+        }
+      },
+      "required": ["categorie", "van", "tot"]
+    }
+    ```
+
+    ```json
+    { "beschikbaar": true, "vanaf_per_nacht": 129, "minimum_nachten": 5 }
+    ```
+
+    Een datum komt binnen als tekst, precies zoals de AI hem opschrijft.
+    Controleer zelf of het een geldige datum is en of hij niet in het verleden
+    ligt — een bezoeker kan "vorig jaar juli" zeggen en dat wordt dan gewoon
+    ingevuld.
+  </Accordion>
+
+  <Accordion title="Terugbelverzoek aanmaken (een write-actie)">
+    Hier verandert er iets aan jouw kant. Zet **Type actie** op **Voert een
+    actie uit (write)**. **Automatisch uitvoeren** staat standaard aan; zet het uit
+    zolang je test, dan krijgt de bot te horen dat de actie niet is ingeschakeld.
+
+    **Beschrijving:** "Maakt een terugbelverzoek aan. Roep dit alleen aan als de
+    bezoeker expliciet vraagt om teruggebeld te worden en een telefoonnummer
+    heeft gegeven."
+
+    ```json
+    {
+      "type": "object",
+      "properties": {
+        "naam": {
+          "type": "string",
+          "description": "De naam die de bezoeker opgeeft"
+        },
+        "telefoon": {
+          "type": "string",
+          "description": "Het telefoonnummer dat de bezoeker opgeeft"
+        },
+        "onderwerp": {
+          "type": "string",
+          "description": "Waar het gesprek over moet gaan, in één zin"
+        }
+      },
+      "required": ["naam", "telefoon"]
+    }
+    ```
+
+    **Aanroep:** `POST https://api.voorbeeld.nl/terugbelverzoek` met die velden
+    als JSON-body.
+
+    ```json
+    { "aangemaakt": true, "referentie": "TB-2026-0912" }
+    ```
+
+    Twee dingen bij write-acties. Zet er aan jouw kant een rem op — hetzelfde
+    nummer twee keer binnen een uur is één verzoek, geen twee. En stuur een
+    referentie terug, zodat de bot iets concreets kan noemen en de bezoeker niet
+    voor de zekerheid nog drie keer vraagt.
+  </Accordion>
+
+  <Accordion title="Openingstijden of wachttijd (zonder parameters)">
+    Het eenvoudigste geval: de bot hoeft niets in te vullen.
+
+    **Beschrijving:** "Geeft de openingstijden van vandaag en of we nu open
+    zijn. Roep dit aan bij elke vraag over openingstijden, ook 'zijn jullie nu
+    open'."
+
+    ```json
+    {}
+    ```
+
+    **Aanroep:** `GET https://api.voorbeeld.nl/openingstijden`
+
+    ```json
+    { "nu_open": true, "vandaag": "09:00-17:30", "morgen": "gesloten" }
+    ```
+
+    Dit is meteen het beste eerste endpoint om te bouwen: geen invoer, geen
+    persoonsgegevens, niets dat mis kan gaan. Werkt dit, dan weet je dat de
+    koppeling, de ondertekening en de beschrijving kloppen.
+  </Accordion>
+</AccordionGroup>
 
 ## Wat jouw endpoint binnenkrijgt
 
@@ -426,8 +569,8 @@ elke waarde die binnenkomt als de woorden van een bezoeker.
   komt, niet dat déze bezoeker recht heeft op deze gegevens. Een endpoint dat
   bij elk ordernummer de bestelling teruggeeft, geeft ieders bestellingen weg.
 - **Liever lezen dan schrijven.** Zet alles wat iets verandert op **Voert een
-  actie uit**, en schakel automatisch uitvoeren pas in als je de stroom
-  vertrouwt.
+  actie uit**, en zet automatisch uitvoeren uit zolang je nog aan het testen
+  bent — het staat standaard aan.
 - **Stuur zo weinig mogelijk terug.** Niet het hele klantrecord, alleen de
   status waar de vraag over ging.
 - **Gebruik een aparte sleutel.** Zet je eigen token in een header, geef hem
