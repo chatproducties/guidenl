@@ -53,27 +53,27 @@
           {
             "group": "Aan de slag",
             "pages": [
-              "nl/introductie",
-              "nl/hoe-het-werkt",
-              "nl/snelstart"
+              "nl/introduction",
+              "nl/how-it-works",
+              "nl/quickstart"
             ]
           },
           {
             "group": "Bouw je chatbot",
             "pages": [
-              "nl/kennisbank",
+              "nl/knowledge-base",
               "nl/ai-agent",
-              "nl/widget-aanpassen",
-              "nl/gegevens-verzamelen",
-              "nl/medewerker-overname",
+              "nl/widget-customization",
+              "nl/data-collection",
+              "nl/human-handover",
               "nl/multi-agent"
             ]
           },
           {
             "group": "Koppelen & installeren",
             "pages": [
-              "nl/installatie",
-              "nl/integraties"
+              "nl/installation",
+              "nl/integrations"
             ]
           }
         ]
@@ -160,6 +160,42 @@
     {
       "source": "/api-reference/:slug*",
       "destination": "/en/integrations"
+    },
+    {
+      "source": "/nl/introductie",
+      "destination": "/nl/introduction"
+    },
+    {
+      "source": "/nl/hoe-het-werkt",
+      "destination": "/nl/how-it-works"
+    },
+    {
+      "source": "/nl/snelstart",
+      "destination": "/nl/quickstart"
+    },
+    {
+      "source": "/nl/kennisbank",
+      "destination": "/nl/knowledge-base"
+    },
+    {
+      "source": "/nl/widget-aanpassen",
+      "destination": "/nl/widget-customization"
+    },
+    {
+      "source": "/nl/gegevens-verzamelen",
+      "destination": "/nl/data-collection"
+    },
+    {
+      "source": "/nl/medewerker-overname",
+      "destination": "/nl/human-handover"
+    },
+    {
+      "source": "/nl/installatie",
+      "destination": "/nl/installation"
+    },
+    {
+      "source": "/nl/integraties",
+      "destination": "/nl/integrations"
     }
   ],
   "navbar": {
