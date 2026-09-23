@@ -42,7 +42,8 @@
             "group": "Connect & install",
             "pages": [
               "en/installation",
-              "en/integrations"
+              "en/integrations",
+              "en/function-calling"
             ]
           }
         ]
@@ -73,7 +74,8 @@
             "group": "Koppelen & installeren",
             "pages": [
               "nl/installation",
-              "nl/integrations"
+              "nl/integrations",
+              "nl/function-calling"
             ]
           }
         ]

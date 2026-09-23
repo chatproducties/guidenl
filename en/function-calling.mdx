@@ -1,0 +1,346 @@
+---
+title: "Function calling"
+description: "Let your chatbot call your own API during a conversation and answer with live data."
+---
+
+Your knowledge base tells the chatbot the rules. Function calling tells it the
+current facts: an order status, a stock level, an available slot. You register
+an address of your own, describe when the bot should use it, and Chatwize calls
+it mid-conversation and answers with what comes back.
+
+## Where to find it
+
+<Steps>
+  <Step title="Open your chatbot">
+    From **Chatbots**, click the chatbot you want to extend.
+  </Step>
+  <Step title="Open the AI agent">
+    In the left sidebar, under **Main menu**, click **AI agent**, then open the agent
+    that should get this ability.
+  </Step>
+  <Step title="Go to Outbound API endpoints">
+    Scroll to **Outbound API endpoints** and click **Add endpoint**.
+  </Step>
+</Steps>
+
+<Note>
+An endpoint belongs to one agent, not to the whole chatbot. If you use multiple
+agents, give the ability to the specialist that needs it. See
+[Multiple agents](/en/multi-agent).
+</Note>
+
+## How one call runs
+
+<Steps>
+  <Step title="The visitor asks something">
+    "Where is my order 10423?"
+  </Step>
+  <Step title="The AI picks the endpoint">
+    It matches the question against your description and decides this endpoint
+    fits. It pulls the parameters out of the conversation, here the order number.
+  </Step>
+  <Step title="Chatwize calls your address">
+    Signed, over HTTPS, with your own headers attached.
+  </Step>
+  <Step title="Your answer goes back as data">
+    The response is handed to the AI as reference material, not as instructions.
+  </Step>
+  <Step title="The bot answers the visitor">
+    In its own words, in the visitor's language.
+  </Step>
+</Steps>
+
+## What you fill in
+
+| Field | What to enter |
+| --- | --- |
+| **Slug** | The tool name the AI knows, in `snake_case`, for example `lookup_order`. Fixed once created. |
+| **Name** | A readable name for yourself, for example `Look up order`. |
+| **When should the bot call this?** | The most important field. Describe what the API does *and* the situation in which the bot should reach for it. Leave it empty and the bot only sees the name and guesses. |
+| **Method** | `GET` for looking something up, `POST`, `PUT` or `PATCH` for something that changes. |
+| **URL** | The full address, starting with `https://`. |
+| **Allowlist host** | The hostname of that address, for example `api.example.com`. It must match the URL exactly; this is what stops the address from being pointed somewhere else later. |
+| **Parameters** | A JSON Schema describing which values the AI may fill in. Empty means the endpoint takes no parameters. |
+| **Action type** | **Read only** for a lookup, **Performs an action** for anything that changes on your side. |
+| **Automatic calling** | Only for write actions: off means the bot may try but gets told it is not enabled. |
+| **Max. calls per conversation** | Between 1 and 50, default 5. Protects against a confused bot that keeps calling. |
+| **Headers** | Your own headers, for example `Authorization` or `X-API-Key`. |
+
+<Tip>
+Write the description as an instruction, not a label. "Looks up an order by order
+number. Call this when the visitor asks where their order is or when it will
+arrive" works. "Order API" does not.
+</Tip>
+
+## A worked example
+
+An order lookup on `https://api.example.com/orders`, with the order number and
+the customer's email as parameters.
+
+**The parameter schema you paste in:**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "The order number as the visitor states it, for example 10423"
+    },
+    "email": {
+      "type": "string",
+      "description": "The email address the order was placed with"
+    }
+  },
+  "required": ["order_number"]
+}
+```
+
+**What Chatwize then sends to you:**
+
+```http
+GET /orders?order_number=10423&email=jan%40example.com HTTP/1.1
+Host: api.example.com
+User-Agent: Chatwize-outbound/1.0
+Content-Type: application/json
+X-Chatwize-Outbound-Timestamp: 1758633600
+X-Chatwize-Outbound-Signature: sha256=9f2c...
+Authorization: Bearer your-own-token
+```
+
+With `POST`, `PUT` or `PATCH` the same values arrive as a JSON body instead:
+
+```json
+{ "order_number": "10423", "email": "jan@example.com" }
+```
+
+**What you return:**
+
+```json
+{
+  "status": "shipped",
+  "carrier": "PostNL",
+  "track_and_trace": "3SABC1234567",
+  "expected": "2026-09-25"
+}
+```
+
+**What the visitor reads:** "Your order 10423 went out with PostNL and is
+expected on 25 September. Track and trace: 3SABC1234567."
+
+## A real example: WooCommerce
+
+Your webshop already has an API. In WooCommerce the order list sits at
+`https://yourstore.com/wp-json/wc/v3/orders` and accepts a `search` parameter.
+Authentication is a consumer key and secret, which you send as a Basic
+authorisation header.
+
+| Field | What you enter |
+| --- | --- |
+| **Method** | `GET` |
+| **URL** | `https://yourstore.com/wp-json/wc/v3/orders?per_page=1` |
+| **Allowlist host** | `yourstore.com` |
+| **Header** | `Authorization` with value `Basic <base64 of consumer_key:consumer_secret>` |
+| **Parameters** | One `search` string: "The order number or email address the visitor gives" |
+
+Chatwize then calls `…/orders?per_page=1&search=10423`. Your `per_page=1` stays
+as you set it: a parameter that is already in the URL is never overwritten by
+the AI. That is the trick for everything you want to fix yourself — a page size,
+a shop ID, a fixed status.
+
+<Warning>
+Two things go wrong with a direct webshop connection. A WooCommerce order object
+is large, easily larger than what reaches the AI, so the bot may see only part
+of one order. And a read key sees **every** order, so anyone who guesses an
+order number gets its status.
+</Warning>
+
+Both are solved the same way: put a small endpoint of your own in front, on your
+own domain. Have it require the order number **and** the email address, check
+that the two belong together, and return three fields:
+
+```json
+{ "status": "shipped", "carrier": "PostNL", "expected": "2026-09-25" }
+```
+
+That is ten lines of code in your shop, and it turns a question of trust ("does
+this visitor belong to this order?") into something your own system answers
+rather than the chatbot. Shopify and Magento work the same way: a `GET` with
+query parameters and a token in a header.
+
+## What your endpoint receives
+
+| Header | Value |
+| --- | --- |
+| `Content-Type` | `application/json` |
+| `User-Agent` | `Chatwize-outbound/1.0` |
+| `X-Chatwize-Outbound-Timestamp` | The moment of sending, in seconds since 1970 |
+| `X-Chatwize-Outbound-Signature` | `sha256=` followed by the signature |
+
+Your own headers are added to these. Headers starting with `x-chatwize-` are
+ignored, as are `Content-Type`, `Host` and transport headers, so that a header
+of yours can never overwrite the signature.
+
+## Verifying the signature
+
+The signature proves the call really came from Chatwize and that nobody changed
+it along the way. You get the secret once, when you create the endpoint. Store
+it immediately, because it is not shown again.
+
+The signature is an HMAC-SHA256 over the timestamp, a dot, and what was sent:
+the request body for `POST`, `PUT` and `PATCH`, or the query string including
+the leading `?` for `GET`.
+
+<CodeGroup>
+
+```js Node.js
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+function isFromChatwize(secret, req, rawBody) {
+  const timestamp = req.headers["x-chatwize-outbound-timestamp"];
+  const received = req.headers["x-chatwize-outbound-signature"] ?? "";
+
+  // Refuse anything older than five minutes: that stops a captured
+  // request from being replayed later.
+  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!timestamp || age > 300) return false;
+
+  const signed = req.method === "GET" ? new URL(req.url, "https://x").search : rawBody;
+  const expected = "sha256=" + createHmac("sha256", secret)
+    .update(`${timestamp}.${signed}`)
+    .digest("hex");
+
+  if (expected.length !== received.length) return false;
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(received));
+}
+```
+
+```python Python
+import hmac, hashlib, time
+
+def is_from_chatwize(secret: str, headers, signed_part: str) -> bool:
+    timestamp = headers.get("X-Chatwize-Outbound-Timestamp", "")
+    received = headers.get("X-Chatwize-Outbound-Signature", "")
+    if not timestamp or abs(time.time() - int(timestamp)) > 300:
+        return False
+
+    digest = hmac.new(
+        secret.encode(),
+        f"{timestamp}.{signed_part}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    return hmac.compare_digest(f"sha256={digest}", received)
+```
+
+```php PHP
+function isFromChatwize(string $secret, array $headers, string $signedPart): bool {
+    $timestamp = $headers['X-Chatwize-Outbound-Timestamp'] ?? '';
+    $received  = $headers['X-Chatwize-Outbound-Signature'] ?? '';
+    if ($timestamp === '' || abs(time() - (int) $timestamp) > 300) {
+        return false;
+    }
+    $expected = 'sha256=' . hash_hmac('sha256', "$timestamp.$signedPart", $secret);
+    return hash_equals($expected, $received);
+}
+```
+
+</CodeGroup>
+
+Three things matter here. Sign over the **raw** body, before any JSON parsing:
+reserialising changes the bytes and breaks the comparison. Compare with a
+constant-time function (`timingSafeEqual`, `compare_digest`, `hash_equals`),
+never with `==`. And reject old timestamps, otherwise a captured call can be
+replayed tomorrow.
+
+## What you send back
+
+| | |
+| --- | --- |
+| **Format** | JSON, or anything else readable as text |
+| **Within** | 5 seconds, after that the call is aborted |
+| **Maximum** | 256 KB, larger responses are refused |
+| **Usable** | Roughly the first two thousand characters reach the AI |
+
+Keep responses short. A list of two hundred results is cut off and the bot
+answers from what did fit. Return the five fields that answer the question, not
+your whole record. Everything you send can end up in the chat window, so leave
+out what the visitor should not see.
+
+## Rules for the parameter schema
+
+Only a small, flat subset of JSON Schema is accepted: enough to describe
+parameters clearly, too little for anything to hide in.
+
+| | |
+| --- | --- |
+| **Shape** | One object with properties. No nested objects, no arrays |
+| **Types** | `string`, `number`, `integer`, `boolean` |
+| **Maximum** | 12 parameters |
+| **Per parameter** | An optional `description` of up to 200 characters and an optional `enum` of up to 30 values |
+| **Names** | Letters, digits and underscores, starting with a letter |
+| **Empty** | `{}` means the endpoint takes no parameters |
+
+An `enum` is the cheapest way to keep the bot on track: with
+`"enum": ["standard", "express"]` it cannot invent a third shipping method.
+
+With `GET`, parameters are appended to the URL as a query string. A parameter
+that already appears in the URL is not overwritten, so your own fixed values
+stay as they are.
+
+## Keep it safe
+
+<Warning>
+Anything your bot may call, any visitor can indirectly cause it to call. Treat
+every value that arrives as a visitor's words.
+</Warning>
+
+- **Authorise on your side.** Chatwize proves the call came from Chatwize, not
+  that this visitor is entitled to this data. An endpoint that returns any order
+  for any order number hands out everyone's orders.
+- **Prefer read over write.** Mark anything that changes something as **Performs
+  an action**, and only turn on automatic calling once you trust the flow.
+- **Return as little as possible.** Not the entire customer record, just the
+  status the question was about.
+- **Use a separate key.** Put your own token in a header, give it read-only
+  rights where you can, and replace it if the endpoint disappears.
+- **Public addresses only.** Internal and local network addresses are refused,
+  and redirects are not followed.
+
+## When it does not work
+
+<AccordionGroup>
+  <Accordion title="The bot never calls the endpoint">
+    Nine times out of ten it is the description. Write out the situation in the
+    visitor's own words ("asks where their order is", "wants to know if something
+    is in stock"). Also check that the endpoint is switched on and that you gave
+    it to the agent actually handling the conversation.
+  </Accordion>
+  <Accordion title="The call is refused before it leaves">
+    The host in the URL must be exactly the same as the allowlist host, letter
+    for letter. `api.example.com` and `www.api.example.com` are two different
+    hosts.
+  </Accordion>
+  <Accordion title="Your signature check keeps failing">
+    You are almost certainly signing the wrong bytes: the parsed and
+    reserialised body instead of the raw one, or the query string without its
+    leading `?`. Log both sides once and compare them character by character.
+  </Accordion>
+  <Accordion title="It times out">
+    Your API has 5 seconds. Is it slow because it looks things up live? Cache
+    the answer on your side, or return the fields you have quickly and leave out
+    the slow one.
+  </Accordion>
+  <Accordion title="The write action does not happen">
+    A write endpoint only runs when automatic calling is on. Until then the bot
+    tries, is told it is not enabled, and says so to the visitor.
+  </Accordion>
+  <Accordion title="Parameters are refused">
+    The AI filled in something that does not match your schema: a word where a
+    number belongs, or a value outside the `enum`. Tighten the descriptions in
+    the schema, because that is what the AI reads.
+  </Accordion>
+</AccordionGroup>
+
+You can follow every call in the inbox: which endpoint was used, which
+parameters went out, and what came back. That is the fastest way to see why an
+answer turned out the way it did.
