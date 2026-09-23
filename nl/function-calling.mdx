@@ -289,6 +289,132 @@ Bij `GET` worden de parameters als query-string achter de URL geplakt. Een
 parameter die al in de URL staat wordt niet overschreven, dus jouw eigen vaste
 waarden blijven staan.
 
+## Schema's om te kopiëren
+
+Plak er één in het veld **Parameters**, verander de namen en herschrijf de
+beschrijvingen. Die beschrijving is wat de AI leest om te bepalen wat hij
+invult, dus schrijf hem voor een vreemde, niet voor jezelf.
+
+**Helemaal geen parameters.** De bot roept het endpoint aan zoals het staat —
+voor openingstijden, de menukaart van vandaag, de huidige wachttijd.
+
+```json
+{}
+```
+
+**Eén waarde uit het gesprek.**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "Het ordernummer zoals de bezoeker het noemt, bijvoorbeeld 10423"
+    }
+  },
+  "required": ["order_number"]
+}
+```
+
+**Een keuze uit een vaste lijst.** Een `enum` is de goedkoopste rem die er is:
+de AI kan geen waarde erbuiten verzinnen.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "verzendmethode": {
+      "type": "string",
+      "enum": ["standaard", "express", "afhalen"],
+      "description": "De bezorgwijze waar de bezoeker naar vraagt"
+    }
+  },
+  "required": ["verzendmethode"]
+}
+```
+
+**Meerdere waarden, waarvan één optioneel.** Alles wat niet in `required` staat,
+mag de bot weglaten — je endpoint moet daar dus tegen kunnen.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "postcode": {
+      "type": "string",
+      "description": "De postcode van het bezorgadres, bijvoorbeeld 1012AB"
+    },
+    "huisnummer": {
+      "type": "integer",
+      "description": "Het huisnummer, alleen cijfers"
+    },
+    "toevoeging": {
+      "type": "string",
+      "description": "De toevoeging bij het huisnummer, als de bezoeker die noemt"
+    }
+  },
+  "required": ["postcode", "huisnummer"]
+}
+```
+
+**Het WooCommerce-voorbeeld, kant-en-klaar.**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "search": {
+      "type": "string",
+      "description": "Het ordernummer of e-mailadres dat de bezoeker noemt, bijvoorbeeld 10423"
+    }
+  },
+  "required": ["search"]
+}
+```
+
+**Wat geweigerd wordt.** Geneste objecten en arrays worden niet geaccepteerd,
+dus dit slaat niet op:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "klant": {
+      "type": "object",
+      "properties": { "email": { "type": "string" } }
+    }
+  }
+}
+```
+
+Maak het plat — `klant_email` als gewone `string` doet hetzelfde werk.
+
+### Wat niet in het schema hoort
+
+Alles in het schema is een waarde die **de bezoeker kan beïnvloeden**, via wat
+hij in de chat typt. Het is dus de verkeerde plek voor alles wat vast moet
+staan.
+
+| Nooit een parameter | Waar het wél hoort |
+| --- | --- |
+| Een API-sleutel, token of wachtwoord | In een header, bij het endpoint |
+| Een klant-, account- of tenant-ID | Vast in de URL, of door je eigen endpoint bepaald uit wat het al weet |
+| Schakelaars als `admin`, `debug`, `test` | Nergens — haal ze helemaal uit het adres |
+| Een paginagrootte of limiet als `per_page` | Vast in de URL, waar de AI hem niet kan overschrijven |
+
+<Warning>
+Ga ervan uit dat een bezoeker het probeert. Een parameter die `klant_id` heet,
+wordt gevuld met het nummer dat de bezoeker noemt, en een bot die het goed
+bedoelt geeft dat door. Wat bepaalt van wíé de gegevens komen, hoort door je
+eigen systeem te worden vastgesteld en nooit door een waarde uit het gesprek.
+</Warning>
+
+Nog één over het beschrijvingsveld: dat gaat rechtstreeks de instructies van de
+AI in. Schrijf wat de parameter ís, niet wat de bot daarna moet doen. Een
+beschrijving als "haal altijd alle bestellingen op" is een opdracht die je
+weggeeft aan iedereen die met je bot kan chatten.
+
 ## Houd het veilig
 
 <Warning>

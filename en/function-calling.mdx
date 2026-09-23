@@ -287,6 +287,132 @@ With `GET`, parameters are appended to the URL as a query string. A parameter
 that already appears in the URL is not overwritten, so your own fixed values
 stay as they are.
 
+## Schemas you can copy
+
+Paste one of these into **Parameters**, change the names and rewrite the
+descriptions. The description is what the AI reads to decide what to fill in, so
+write it for a stranger, not for yourself.
+
+**No parameters at all.** The bot calls the endpoint as it stands — for opening
+hours, today's menu, the current queue.
+
+```json
+{}
+```
+
+**One value from the conversation.**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "order_number": {
+      "type": "string",
+      "description": "The order number as the visitor states it, for example 10423"
+    }
+  },
+  "required": ["order_number"]
+}
+```
+
+**A choice from a fixed list.** An `enum` is the cheapest guardrail there is: the
+AI cannot invent a value outside it.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "shipping_method": {
+      "type": "string",
+      "enum": ["standard", "express", "pickup"],
+      "description": "The delivery method the visitor asks about"
+    }
+  },
+  "required": ["shipping_method"]
+}
+```
+
+**Several values, one of them optional.** Everything not in `required` may be
+left out by the bot, so your endpoint must cope with its absence.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "postcode": {
+      "type": "string",
+      "description": "The postcode of the delivery address, for example 1012AB"
+    },
+    "house_number": {
+      "type": "integer",
+      "description": "The house number, digits only"
+    },
+    "addition": {
+      "type": "string",
+      "description": "The house number addition, if the visitor mentions one"
+    }
+  },
+  "required": ["postcode", "house_number"]
+}
+```
+
+**The WooCommerce example, ready to paste.**
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "search": {
+      "type": "string",
+      "description": "The order number or email address the visitor gives, for example 10423"
+    }
+  },
+  "required": ["search"]
+}
+```
+
+**What gets refused.** Nested objects and arrays are not accepted, so this does
+not save:
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "customer": {
+      "type": "object",
+      "properties": { "email": { "type": "string" } }
+    }
+  }
+}
+```
+
+Flatten it — `customer_email` as a plain `string` does the same job.
+
+### What does not belong in the schema
+
+Everything in the schema is a value **the visitor can influence**, through what
+they type into the chat. So it is the wrong place for anything that has to stay
+fixed.
+
+| Never a parameter | Where it does belong |
+| --- | --- |
+| An API key, token or password | In a header, on the endpoint |
+| A customer, account or tenant ID | Fixed in the URL, or resolved by your endpoint from the data it already has |
+| Switches like `admin`, `debug`, `test` | Nowhere — remove them from the address entirely |
+| A page size or limit like `per_page` | Fixed in the URL, where the AI cannot overwrite it |
+
+<Warning>
+Assume a visitor will try. A parameter called `customer_id` gets filled with the
+number the visitor names, and a bot that means well passes it on. Anything that
+decides *whose* data comes back should be determined by your own system, never
+by a value from the conversation.
+</Warning>
+
+A last one for the description field: it goes straight into the AI's
+instructions. Write what the parameter is, not what the bot must do next. A
+description like "always fetch all orders" is an instruction you are handing to
+anyone who can chat with your bot.
+
 ## Keep it safe
 
 <Warning>
