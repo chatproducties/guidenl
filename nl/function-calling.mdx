@@ -1,52 +1,23 @@
 ---
 title: "Function calling"
-description: "Laat je chatbot tijdens een gesprek je eigen API aanroepen en met actuele gegevens antwoorden."
+description: "Laat je chatbot tijdens een gesprek je eigen API aanroepen."
 ---
 
-Je kennisbank vertelt de chatbot de regels. Function calling vertelt hem de
-actuele stand: een orderstatus, een voorraad, een vrij tijdslot. Je legt een
-eigen adres vast, beschrijft wanneer de bot het moet gebruiken, en Chatwize
-roept het midden in het gesprek aan en antwoordt met wat er terugkomt.
+Je kennisbank bevat de regels. Function calling haalt de actuele stand op: een
+orderstatus, een voorraad, een vrij tijdslot. Jij geeft een adres en zegt
+wanneer de bot het moet gebruiken; Chatwize roept het aan tijdens het gesprek.
 
 ## Waar vind je het
 
 <Steps>
   <Step title="Open je chatbot">
-    Klik vanuit **Chatbots** op de chatbot die je wilt uitbreiden.
+    Klik vanuit **Chatbots** op je chatbot.
   </Step>
   <Step title="Open AI-agent">
-    Klik in de linker zijbalk, onder **Hoofdmenu**, op **AI-agent** en open de
-    agent die dit moet kunnen.
+    In de linker zijbalk, onder **Hoofdmenu**. Open de agent die dit moet kunnen.
   </Step>
-  <Step title="Ga naar Outbound API-endpoints">
-    Scroll naar **Outbound API-endpoints** en klik op **Voeg endpoint toe**.
-  </Step>
-</Steps>
-
-<Note>
-Een endpoint hoort bij één agent, niet bij de hele chatbot. Werk je met
-meerdere agents, geef het dan aan de specialist die het nodig heeft. Zie
-[Meerdere agents](/nl/multi-agent).
-</Note>
-
-## Hoe één aanroep verloopt
-
-<Steps>
-  <Step title="De bezoeker vraagt iets">
-    "Waar blijft mijn bestelling 10423?"
-  </Step>
-  <Step title="De AI kiest het endpoint">
-    Hij legt de vraag naast jouw beschrijving en besluit dat dit endpoint past.
-    De parameters haalt hij uit het gesprek, hier het ordernummer.
-  </Step>
-  <Step title="Chatwize roept jouw adres aan">
-    Ondertekend, over HTTPS, met jouw eigen headers erbij.
-  </Step>
-  <Step title="Jouw antwoord gaat terug als gegevens">
-    Het antwoord gaat naar de AI als naslagmateriaal, niet als opdracht.
-  </Step>
-  <Step title="De bot antwoordt de bezoeker">
-    In zijn eigen woorden, in de taal van de bezoeker.
+  <Step title="Voeg een endpoint toe">
+    Onder **Outbound API-endpoints**, klik **Voeg endpoint toe**.
   </Step>
 </Steps>
 
@@ -54,566 +25,228 @@ meerdere agents, geef het dan aan de specialist die het nodig heeft. Zie
 
 | Veld | Wat je invult |
 | --- | --- |
-| **Slug** | De tool-naam die de AI kent, in `snake_case`, bijvoorbeeld `zoek_bestelling`. Ligt vast zodra je hem hebt aangemaakt. |
-| **Naam** | Een leesbare naam voor jezelf, bijvoorbeeld `Bestelling opzoeken`. |
-| **Wanneer moet de bot dit aanroepen?** | Het belangrijkste veld. Beschrijf wat de API doet *én* in welke situatie de bot ernaar moet grijpen. Laat je het leeg, dan ziet de bot alleen de naam en raadt hij maar wat. |
-| **Method** | `GET` om iets op te zoeken, `POST`, `PUT` of `PATCH` voor iets dat wijzigt. |
-| **URL** | Het volledige adres, beginnend met `https://`. |
-| **Allowlist host** | De hostnaam van dat adres, bijvoorbeeld `api.voorbeeld.nl`. Die moet exact gelijk zijn aan de URL; dit is wat voorkomt dat het adres later ergens anders heen wijst. |
-| **Parameters die de bot mag invullen** | Een JSON-Schema met de waarden die de AI mag meesturen. Leeg betekent: dit endpoint heeft geen parameters. |
-| **Type actie** | **Alleen lezen (veilig)** voor een opzoeking, **Voert een actie uit (write)** voor alles wat bij jou iets verandert. |
-| **Automatisch uitvoeren** | Alleen bij write-acties, en **standaard aan**. Zet je het uit, dan probeert de bot het wel maar krijgt hij te horen dat het niet is ingeschakeld. |
-| **Max. aanroepen per gesprek** | Tussen 1 en 50, standaard 5. Beschermt tegen een verwarde bot die blijft aanroepen. |
-| **Headers** | Je eigen headers, bijvoorbeeld `Authorization` of `X-API-Key`. |
+| **Slug** | Naam voor de AI, in `snake_case`: `zoek_bestelling`. Ligt daarna vast. |
+| **Naam** | Naam voor jezelf. |
+| **Wanneer moet de bot dit aanroepen?** | Het belangrijkste veld. Wat de API doet én in welke situatie. |
+| **Method** | `GET` om op te zoeken. `POST`, `PUT` of `PATCH` als er iets wijzigt. |
+| **URL** | Het volledige adres, met `https://`. Publiek bereikbaar. |
+| **Allowlist host** | De hostnaam uit de URL, letterlijk gelijk. |
+| **Parameters** | JSON-Schema met wat de AI mag invullen. Leeg = geen parameters. |
+| **Type actie** | **Alleen lezen** of **Voert een actie uit (write)**. |
+| **Automatisch uitvoeren** | Alleen bij write. Staat **standaard aan** — zet uit zolang je test. |
+| **Max. aanroepen per gesprek** | Rem tegen een bot die blijft aanroepen. |
+| **Headers** | Je eigen headers, zoals `Authorization`. |
 
 <Tip>
-Schrijf de beschrijving als een opdracht, niet als een etiket. "Zoekt een
-bestelling op via het ordernummer. Roep dit aan als de bezoeker vraagt waar
-zijn bestelling blijft of wanneer die aankomt" werkt. "Order-API" niet.
+Schrijf de beschrijving als opdracht: "Zoekt een bestelling op via het
+ordernummer. Roep dit aan als de bezoeker vraagt waar zijn bestelling blijft."
+Niet: "Order-API".
 </Tip>
 
-## Een uitgewerkt voorbeeld
+## Voorbeeld
 
-Een orderopzoeking op `https://api.voorbeeld.nl/orders`, met het ordernummer en
-het e-mailadres van de klant als parameters.
+Orderopzoeking op `https://api.voorbeeld.nl/orders`.
 
-**Het parameter-schema dat je invult:**
-
-```json
+```json Parameters
 {
   "type": "object",
   "properties": {
     "order_number": {
       "type": "string",
       "description": "Het ordernummer zoals de bezoeker het noemt, bijvoorbeeld 10423"
-    },
-    "email": {
-      "type": "string",
-      "description": "Het e-mailadres waarmee de bestelling is geplaatst"
     }
   },
   "required": ["order_number"]
 }
 ```
 
-**Wat Chatwize dan naar je toe stuurt:**
-
-```http
-GET /orders?order_number=10423&email=jan%40voorbeeld.nl HTTP/1.1
-Host: api.voorbeeld.nl
-User-Agent: Chatwize-outbound/1.0
-Content-Type: application/json
-X-Chatwize-Outbound-Timestamp: 1758633600
-X-Chatwize-Outbound-Signature: sha256=9f2c...
-Authorization: Bearer je-eigen-token
-```
-
-Bij `POST`, `PUT` of `PATCH` komen dezelfde waarden binnen als JSON-body:
-
-```json
-{ "order_number": "10423", "email": "jan@voorbeeld.nl" }
-```
-
-**Wat jij terugstuurt:**
-
-```json
-{
-  "status": "verzonden",
-  "vervoerder": "PostNL",
-  "track_and_trace": "3SABC1234567",
-  "verwacht": "2026-09-25"
-}
-```
-
-**Wat de bezoeker leest:** "Je bestelling 10423 is met PostNL onderweg en wordt
-25 september verwacht. Track en trace: 3SABC1234567."
-
-## Een echt voorbeeld: WooCommerce
-
-Je webshop heeft al een API. Bij WooCommerce staat de bestellijst op
-`https://jouwwinkel.nl/wp-json/wc/v3/orders` en accepteert die een
-`search`-parameter. Inloggen gaat met een consumer key en secret, die je
-meestuurt als Basic-authorisatieheader.
-
-| Veld | Wat je invult |
-| --- | --- |
-| **Method** | `GET` |
-| **URL** | `https://jouwwinkel.nl/wp-json/wc/v3/orders?per_page=1` |
-| **Allowlist host** | `jouwwinkel.nl` |
-| **Header** | `Authorization` met waarde `Basic <base64 van consumer_key:consumer_secret>` |
-| **Parameters** | Eén `search`-string: "Het ordernummer of e-mailadres dat de bezoeker noemt" |
-
-Chatwize roept dan `…/orders?per_page=1&search=10423` aan. Jouw `per_page=1`
-blijft staan: een parameter die al in de URL staat wordt nooit door de AI
-overschreven. Dat is de truc voor alles wat je zelf wilt vastzetten — een
-paginagrootte, een winkel-ID, een vaste status.
-
-<Warning>
-Twee dingen gaan mis bij een directe webshopkoppeling. Een WooCommerce-order is
-groot, al snel groter dan wat de AI bereikt, dus de bot ziet mogelijk maar een
-deel van één bestelling. En een leessleutel ziet **alle** bestellingen, dus wie
-een ordernummer raadt, krijgt de status ervan.
-</Warning>
-
-Allebei los je op dezelfde manier op: zet er een klein eigen endpoint voor, op
-je eigen domein. Laat dat het ordernummer **én** het e-mailadres eisen,
-controleren of die twee bij elkaar horen, en drie velden teruggeven:
+Chatwize roept `…/orders?order_number=10423` aan. Jij antwoordt:
 
 ```json
 { "status": "verzonden", "vervoerder": "PostNL", "verwacht": "2026-09-25" }
 ```
 
-Dat is tien regels code in je winkel, en het verplaatst de vertrouwensvraag
-("hoort deze bezoeker bij deze bestelling?") van de chatbot naar je eigen
-systeem. Shopify en Magento werken hetzelfde: een `GET` met query-parameters en
-een token in een header.
-
-## Meer voorbeelden
-
-Vier situaties die vaak voorkomen, elk met het schema, de aanroep en het
-antwoord. Klap open wat op jou lijkt.
+De bezoeker leest: *"Je bestelling is met PostNL onderweg en wordt 25 september
+verwacht."*
 
 <AccordionGroup>
-  <Accordion title="Voorraad opzoeken (webshop of groothandel)">
-    De bezoeker vraagt of iets op voorraad is. Eén artikelcode erin, een aantal
-    eruit.
-
-    **Beschrijving:** "Geeft de actuele voorraad van één artikel. Roep dit aan
-    als de bezoeker vraagt of iets op voorraad is, hoeveel er zijn, of wanneer
-    iets weer binnenkomt."
+  <Accordion title="Meer voorbeelden">
+    **Voorraad** — "Geeft de voorraad van één artikel. Roep dit aan als de
+    bezoeker vraagt of iets op voorraad is."
 
     ```json
     {
       "type": "object",
       "properties": {
-        "artikelcode": {
-          "type": "string",
-          "description": "De artikel- of SKU-code zoals die op de site staat, bijvoorbeeld AB-1234"
-        }
+        "artikelcode": { "type": "string", "description": "De artikelcode zoals op de site, bijvoorbeeld AB-1234" }
       },
       "required": ["artikelcode"]
     }
     ```
 
-    **Aanroep:** `GET https://api.voorbeeld.nl/voorraad?artikelcode=AB-1234`
-
-    ```json
-    { "op_voorraad": 12, "levertijd_dagen": 2, "verwacht": null }
-    ```
-
-    Geef door wat de bezoeker mag weten, niet je inkoopprijs of je leverancier.
-    Alles in dit antwoord kan in het chatvenster belanden.
-  </Accordion>
-
-  <Accordion title="Beschikbaarheid van een verhuurobject">
-    De bezoeker wil weten of een camper, boot of zaal vrij is in een bepaalde
-    periode. Twee datums erin, vrij of niet eruit.
-
-    **Beschrijving:** "Controleert of een object vrij is tussen twee datums.
-    Roep dit aan zodra de bezoeker een periode noemt of vraagt of iets nog
-    beschikbaar is."
+    **Beschikbaarheid** — een `enum` houdt de bot binnen jouw categorieën.
 
     ```json
     {
       "type": "object",
       "properties": {
-        "categorie": {
-          "type": "string",
-          "enum": ["compact", "gezin", "luxe"],
-          "description": "Het type waar de bezoeker naar vraagt"
-        },
-        "van": {
-          "type": "string",
-          "description": "Startdatum als JJJJ-MM-DD, bijvoorbeeld 2026-07-04"
-        },
-        "tot": {
-          "type": "string",
-          "description": "Einddatum als JJJJ-MM-DD, bijvoorbeeld 2026-07-18"
-        }
+        "categorie": { "type": "string", "enum": ["compact", "gezin", "luxe"], "description": "Het type waar de bezoeker naar vraagt" },
+        "van": { "type": "string", "description": "Startdatum als JJJJ-MM-DD" },
+        "tot": { "type": "string", "description": "Einddatum als JJJJ-MM-DD" }
       },
       "required": ["categorie", "van", "tot"]
     }
     ```
 
-    ```json
-    { "beschikbaar": true, "vanaf_per_nacht": 129, "minimum_nachten": 5 }
-    ```
+    Een datum komt binnen als tekst. Controleer zelf of hij klopt.
 
-    Een datum komt binnen als tekst, precies zoals de AI hem opschrijft.
-    Controleer zelf of het een geldige datum is en of hij niet in het verleden
-    ligt — een bezoeker kan "vorig jaar juli" zeggen en dat wordt dan gewoon
-    ingevuld.
-  </Accordion>
-
-  <Accordion title="Terugbelverzoek aanmaken (een write-actie)">
-    Hier verandert er iets aan jouw kant. Zet **Type actie** op **Voert een
-    actie uit (write)**. **Automatisch uitvoeren** staat standaard aan; zet het uit
-    zolang je test, dan krijgt de bot te horen dat de actie niet is ingeschakeld.
-
-    **Beschrijving:** "Maakt een terugbelverzoek aan. Roep dit alleen aan als de
-    bezoeker expliciet vraagt om teruggebeld te worden en een telefoonnummer
-    heeft gegeven."
+    **Terugbelverzoek** — een write-actie via `POST`. Voorkom dubbele verzoeken
+    aan jouw kant.
 
     ```json
     {
       "type": "object",
       "properties": {
-        "naam": {
-          "type": "string",
-          "description": "De naam die de bezoeker opgeeft"
-        },
-        "telefoon": {
-          "type": "string",
-          "description": "Het telefoonnummer dat de bezoeker opgeeft"
-        },
-        "onderwerp": {
-          "type": "string",
-          "description": "Waar het gesprek over moet gaan, in één zin"
-        }
+        "naam": { "type": "string", "description": "De naam die de bezoeker opgeeft" },
+        "telefoon": { "type": "string", "description": "Het telefoonnummer dat de bezoeker opgeeft" }
       },
       "required": ["naam", "telefoon"]
     }
     ```
 
-    **Aanroep:** `POST https://api.voorbeeld.nl/terugbelverzoek` met die velden
-    als JSON-body.
-
-    ```json
-    { "aangemaakt": true, "referentie": "TB-2026-0912" }
-    ```
-
-    Twee dingen bij write-acties. Zet er aan jouw kant een rem op — hetzelfde
-    nummer twee keer binnen een uur is één verzoek, geen twee. En stuur een
-    referentie terug, zodat de bot iets concreets kan noemen en de bezoeker niet
-    voor de zekerheid nog drie keer vraagt.
+    **Geen parameters** — `{}`. Bijvoorbeeld openingstijden. Het beste endpoint
+    om mee te beginnen.
   </Accordion>
 
-  <Accordion title="Openingstijden of wachttijd (zonder parameters)">
-    Het eenvoudigste geval: de bot hoeft niets in te vullen.
+  <Accordion title="Een webshop koppelen">
+    WooCommerce: `https://jouwwinkel.nl/wp-json/wc/v3/orders` met parameter
+    `search`, en je consumer key en secret in een `Authorization`-header.
+    Shopify en Magento werken hetzelfde: `GET` met query-parameters, token in een
+    header.
 
-    **Beschrijving:** "Geeft de openingstijden van vandaag en of we nu open
-    zijn. Roep dit aan bij elke vraag over openingstijden, ook 'zijn jullie nu
-    open'."
+    Vaste waarden zet je zelf in de URL (`?per_page=1`); die kan de AI niet
+    overschrijven.
 
-    ```json
-    {}
-    ```
-
-    **Aanroep:** `GET https://api.voorbeeld.nl/openingstijden`
-
-    ```json
-    { "nu_open": true, "vandaag": "09:00-17:30", "morgen": "gesloten" }
-    ```
-
-    Dit is meteen het beste eerste endpoint om te bouwen: geen invoer, geen
-    persoonsgegevens, niets dat mis kan gaan. Werkt dit, dan weet je dat de
-    koppeling, de ondertekening en de beschrijving kloppen.
+    <Warning>
+    Een leessleutel ziet **alle** bestellingen — wie een ordernummer raadt,
+    krijgt de status. Zet er je eigen endpoint voor dat ordernummer én
+    e-mailadres eist en alleen een paar velden teruggeeft.
+    </Warning>
   </Accordion>
 </AccordionGroup>
 
-## Wat jouw endpoint binnenkrijgt
+## Het schema
 
-| Header | Waarde |
+Eén plat object. Properties van het type `string`, `number`, `integer` of
+`boolean`, eventueel met `enum`. Geen geneste objecten of arrays. De
+`description` is wat de AI leest.
+
+Alles in het schema kan de bezoeker beïnvloeden met wat hij typt. Dit hoort er
+dus nooit in:
+
+| Nooit een parameter | Waar het wel hoort |
 | --- | --- |
-| `Content-Type` | `application/json` |
-| `User-Agent` | `Chatwize-outbound/1.0` |
-| `X-Chatwize-Outbound-Timestamp` | Het moment van versturen, in seconden sinds 1970 |
-| `X-Chatwize-Outbound-Signature` | `sha256=` gevolgd door de ondertekening |
+| Sleutel, token, wachtwoord | Header |
+| Klant-, account- of tenant-ID | Vast in de URL, of bepaald door je eigen endpoint |
+| `admin`, `debug` | Nergens |
+| `per_page` en andere limieten | Vast in de URL |
 
-Daar komen jouw eigen headers bij. Headers die met `x-chatwize-` beginnen
-worden genegeerd, net als `Content-Type`, `Host` en transport-headers — zo kan
-een header van jou de ondertekening nooit overschrijven.
+<Warning>
+Een parameter `klant_id` wordt gevuld met wat de bezoeker zegt. Wíé de gegevens
+krijgt, bepaalt je eigen systeem — nooit het gesprek.
+</Warning>
 
-## De ondertekening controleren
+## Wat je binnenkrijgt
 
-De ondertekening bewijst dat de aanroep écht van Chatwize komt en dat er
-onderweg niets aan is veranderd. Je krijgt de sleutel één keer te zien, bij het
-aanmaken van het endpoint. Bewaar hem meteen, want hij wordt niet opnieuw
-getoond.
+JSON over HTTPS, met jouw headers en een ondertekening. Controleer die: dan weet
+je dat het verzoek van Chatwize komt en niet is gewijzigd. De sleutel zie je
+één keer, bij het aanmaken.
 
-De ondertekening is een HMAC-SHA256 over het tijdstempel, een punt, en wat er
-verstuurd is: de body bij `POST`, `PUT` en `PATCH`, of de query-string inclusief
-het vraagteken bij `GET`.
+<AccordionGroup>
+  <Accordion title="Ondertekening controleren">
+    Twee headers: `X-Chatwize-Outbound-Timestamp` (moment van versturen) en
+    `X-Chatwize-Outbound-Signature` (`sha256=` plus een HMAC-SHA256 over
+    `<tijdstempel>.<inhoud>`). De inhoud is de rauwe body bij `POST`, `PUT` en
+    `PATCH`, en de query-string bij `GET`.
 
-<CodeGroup>
+    <CodeGroup>
 
-```js Node.js
-import { createHmac, timingSafeEqual } from "node:crypto";
+    ```js Node.js
+    import { createHmac, timingSafeEqual } from "node:crypto";
 
-function isVanChatwize(secret, req, rawBody) {
-  const timestamp = req.headers["x-chatwize-outbound-timestamp"];
-  const ontvangen = req.headers["x-chatwize-outbound-signature"] ?? "";
+    function isVanChatwize(secret, req, rawBody) {
+      const ts = req.headers["x-chatwize-outbound-timestamp"];
+      const ontvangen = req.headers["x-chatwize-outbound-signature"] ?? "";
+      if (!ts || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false;
 
-  // Weiger alles ouder dan vijf minuten: dat voorkomt dat een
-  // onderschepte aanroep later opnieuw wordt afgespeeld.
-  const leeftijd = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!timestamp || leeftijd > 300) return false;
+      const inhoud = req.method === "GET" ? new URL(req.url, "https://x").search : rawBody;
+      const verwacht = "sha256=" + createHmac("sha256", secret)
+        .update(`${ts}.${inhoud}`).digest("hex");
 
-  const getekend = req.method === "GET" ? new URL(req.url, "https://x").search : rawBody;
-  const verwacht = "sha256=" + createHmac("sha256", secret)
-    .update(`${timestamp}.${getekend}`)
-    .digest("hex");
-
-  if (verwacht.length !== ontvangen.length) return false;
-  return timingSafeEqual(Buffer.from(verwacht), Buffer.from(ontvangen));
-}
-```
-
-```python Python
-import hmac, hashlib, time
-
-def is_van_chatwize(secret: str, headers, getekend_deel: str) -> bool:
-    timestamp = headers.get("X-Chatwize-Outbound-Timestamp", "")
-    ontvangen = headers.get("X-Chatwize-Outbound-Signature", "")
-    if not timestamp or abs(time.time() - int(timestamp)) > 300:
-        return False
-
-    digest = hmac.new(
-        secret.encode(),
-        f"{timestamp}.{getekend_deel}".encode(),
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(f"sha256={digest}", ontvangen)
-```
-
-```php PHP
-function isVanChatwize(string $secret, array $headers, string $getekendDeel): bool {
-    $timestamp = $headers['X-Chatwize-Outbound-Timestamp'] ?? '';
-    $ontvangen = $headers['X-Chatwize-Outbound-Signature'] ?? '';
-    if ($timestamp === '' || abs(time() - (int) $timestamp) > 300) {
-        return false;
+      if (verwacht.length !== ontvangen.length) return false;
+      return timingSafeEqual(Buffer.from(verwacht), Buffer.from(ontvangen));
     }
-    $verwacht = 'sha256=' . hash_hmac('sha256', "$timestamp.$getekendDeel", $secret);
-    return hash_equals($verwacht, $ontvangen);
-}
-```
+    ```
 
-</CodeGroup>
+    ```python Python
+    import hmac, hashlib, time
 
-Drie dingen zijn hier belangrijk. Onderteken over de **rauwe** body, vóór je
-de JSON parseert: opnieuw wegschrijven verandert de bytes en breekt de
-vergelijking. Vergelijk met een functie die altijd even lang doet
-(`timingSafeEqual`, `compare_digest`, `hash_equals`), nooit met `==`. En weiger
-oude tijdstempels, anders kan een onderschepte aanroep morgen opnieuw worden
-afgespeeld.
+    def is_van_chatwize(secret: str, headers, inhoud: str) -> bool:
+        ts = headers.get("X-Chatwize-Outbound-Timestamp", "")
+        ontvangen = headers.get("X-Chatwize-Outbound-Signature", "")
+        if not ts or abs(time.time() - int(ts)) > 300:
+            return False
+        digest = hmac.new(secret.encode(), f"{ts}.{inhoud}".encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(f"sha256={digest}", ontvangen)
+    ```
+
+    ```php PHP
+    function isVanChatwize(string $secret, array $headers, string $inhoud): bool {
+        $ts = $headers['X-Chatwize-Outbound-Timestamp'] ?? '';
+        $ontvangen = $headers['X-Chatwize-Outbound-Signature'] ?? '';
+        if ($ts === '' || abs(time() - (int) $ts) > 300) return false;
+        $verwacht = 'sha256=' . hash_hmac('sha256', "$ts.$inhoud", $secret);
+        return hash_equals($verwacht, $ontvangen);
+    }
+    ```
+
+    </CodeGroup>
+
+    Onderteken over de rauwe body, vergelijk met `timingSafeEqual` /
+    `compare_digest` / `hash_equals` (nooit `==`), en neem bij `GET` het
+    vraagteken mee.
+  </Accordion>
+</AccordionGroup>
 
 ## Wat je terugstuurt
 
-| | |
-| --- | --- |
-| **Vorm** | JSON, of iets anders dat als tekst leesbaar is |
-| **Binnen** | 5 seconden, daarna wordt de aanroep afgebroken |
-| **Maximaal** | 256 KB, grotere antwoorden worden geweigerd |
-| **Bruikbaar** | Ongeveer de eerste tweeduizend tekens bereiken de AI |
+JSON, binnen vijf seconden, klein. Alleen het begin van een lang antwoord
+bereikt de AI. Alles wat je stuurt kan in de chat belanden.
 
-Houd je antwoord kort. Een lijst van tweehonderd resultaten wordt afgekapt en
-de bot antwoordt met wat er wél in paste. Stuur de vijf velden die de vraag
-beantwoorden, niet je hele record. Alles wat je meestuurt kan in het
-chatvenster belanden, dus laat weg wat de bezoeker niet mag zien.
-
-## Regels voor het parameter-schema
-
-Er wordt maar een kleine, platte selectie uit JSON-Schema geaccepteerd: genoeg
-om parameters duidelijk te beschrijven, te weinig om iets in te verstoppen.
-
-| | |
-| --- | --- |
-| **Vorm** | Eén object met properties. Geen geneste objecten, geen arrays |
-| **Typen** | `string`, `number`, `integer`, `boolean` |
-| **Maximaal** | 12 parameters |
-| **Per parameter** | Een optionele `description` van maximaal 200 tekens en een optionele `enum` van maximaal 30 waarden |
-| **Namen** | Letters, cijfers en liggende streepjes, beginnend met een letter |
-| **Leeg** | `{}` betekent: dit endpoint heeft geen parameters |
-
-Een `enum` is de goedkoopste manier om de bot op het spoor te houden: met
-`"enum": ["standaard", "express"]` kan hij geen derde verzendmethode verzinnen.
-
-Bij `GET` worden de parameters als query-string achter de URL geplakt. Een
-parameter die al in de URL staat wordt niet overschreven, dus jouw eigen vaste
-waarden blijven staan.
-
-## Schema's om te kopiëren
-
-Plak er één in het veld **Parameters**, verander de namen en herschrijf de
-beschrijvingen. Die beschrijving is wat de AI leest om te bepalen wat hij
-invult, dus schrijf hem voor een vreemde, niet voor jezelf.
-
-**Helemaal geen parameters.** De bot roept het endpoint aan zoals het staat —
-voor openingstijden, de menukaart van vandaag, de huidige wachttijd.
-
-```json
-{}
-```
-
-**Eén waarde uit het gesprek.**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "order_number": {
-      "type": "string",
-      "description": "Het ordernummer zoals de bezoeker het noemt, bijvoorbeeld 10423"
-    }
-  },
-  "required": ["order_number"]
-}
-```
-
-**Een keuze uit een vaste lijst.** Een `enum` is de goedkoopste rem die er is:
-de AI kan geen waarde erbuiten verzinnen.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "verzendmethode": {
-      "type": "string",
-      "enum": ["standaard", "express", "afhalen"],
-      "description": "De bezorgwijze waar de bezoeker naar vraagt"
-    }
-  },
-  "required": ["verzendmethode"]
-}
-```
-
-**Meerdere waarden, waarvan één optioneel.** Alles wat niet in `required` staat,
-mag de bot weglaten — je endpoint moet daar dus tegen kunnen.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "postcode": {
-      "type": "string",
-      "description": "De postcode van het bezorgadres, bijvoorbeeld 1012AB"
-    },
-    "huisnummer": {
-      "type": "integer",
-      "description": "Het huisnummer, alleen cijfers"
-    },
-    "toevoeging": {
-      "type": "string",
-      "description": "De toevoeging bij het huisnummer, als de bezoeker die noemt"
-    }
-  },
-  "required": ["postcode", "huisnummer"]
-}
-```
-
-**Het WooCommerce-voorbeeld, kant-en-klaar.**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "search": {
-      "type": "string",
-      "description": "Het ordernummer of e-mailadres dat de bezoeker noemt, bijvoorbeeld 10423"
-    }
-  },
-  "required": ["search"]
-}
-```
-
-**Wat geweigerd wordt.** Geneste objecten en arrays worden niet geaccepteerd,
-dus dit slaat niet op:
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "klant": {
-      "type": "object",
-      "properties": { "email": { "type": "string" } }
-    }
-  }
-}
-```
-
-Maak het plat — `klant_email` als gewone `string` doet hetzelfde werk.
-
-### Wat niet in het schema hoort
-
-Alles in het schema is een waarde die **de bezoeker kan beïnvloeden**, via wat
-hij in de chat typt. Het is dus de verkeerde plek voor alles wat vast moet
-staan.
-
-| Nooit een parameter | Waar het wél hoort |
-| --- | --- |
-| Een API-sleutel, token of wachtwoord | In een header, bij het endpoint |
-| Een klant-, account- of tenant-ID | Vast in de URL, of door je eigen endpoint bepaald uit wat het al weet |
-| Schakelaars als `admin`, `debug`, `test` | Nergens — haal ze helemaal uit het adres |
-| Een paginagrootte of limiet als `per_page` | Vast in de URL, waar de AI hem niet kan overschrijven |
+## Veilig koppelen
 
 <Warning>
-Ga ervan uit dat een bezoeker het probeert. Een parameter die `klant_id` heet,
-wordt gevuld met het nummer dat de bezoeker noemt, en een bot die het goed
-bedoelt geeft dat door. Wat bepaalt van wíé de gegevens komen, hoort door je
-eigen systeem te worden vastgesteld en nooit door een waarde uit het gesprek.
+Wat je bot mag aanroepen, kan elke bezoeker indirect laten aanroepen.
 </Warning>
 
-Nog één over het beschrijvingsveld: dat gaat rechtstreeks de instructies van de
-AI in. Schrijf wat de parameter ís, niet wat de bot daarna moet doen. Een
-beschrijving als "haal altijd alle bestellingen op" is een opdracht die je
-weggeeft aan iedereen die met je bot kan chatten.
-
-## Houd het veilig
-
-<Warning>
-Wat jouw bot mag aanroepen, kan elke bezoeker indirect laten aanroepen. Behandel
-elke waarde die binnenkomt als de woorden van een bezoeker.
-</Warning>
-
-- **Controleer zelf of het mag.** Chatwize bewijst dat de aanroep van Chatwize
-  komt, niet dat déze bezoeker recht heeft op deze gegevens. Een endpoint dat
-  bij elk ordernummer de bestelling teruggeeft, geeft ieders bestellingen weg.
-- **Liever lezen dan schrijven.** Zet alles wat iets verandert op **Voert een
-  actie uit**, en zet automatisch uitvoeren uit zolang je nog aan het testen
-  bent — het staat standaard aan.
-- **Stuur zo weinig mogelijk terug.** Niet het hele klantrecord, alleen de
-  status waar de vraag over ging.
-- **Gebruik een aparte sleutel.** Zet je eigen token in een header, geef hem
-  waar het kan alleen leesrechten, en vervang hem als het endpoint verdwijnt.
-- **Alleen publieke adressen.** Interne adressen en adressen in je eigen
-  netwerk worden geweigerd, en doorverwijzingen worden niet gevolgd.
+- **Controleer zelf of het mag.** De ondertekening bewijst dat het van Chatwize
+  komt, niet dat deze bezoeker recht heeft op deze gegevens.
+- **Liever lezen dan schrijven.** Automatisch uitvoeren uit zolang je test.
+- **Stuur zo weinig mogelijk terug.**
+- **Aparte sleutel in een header**, met zo min mogelijk rechten.
+- **Publiek adres dat direct antwoordt.** Interne adressen en doorverwijzingen
+  werken niet.
 
 ## Als het niet werkt
 
-<AccordionGroup>
-  <Accordion title="De bot roept het endpoint nooit aan">
-    In negen van de tien gevallen ligt het aan de beschrijving. Schrijf de
-    situatie uit in de woorden van de bezoeker ("vraagt waar zijn bestelling
-    blijft", "wil weten of iets op voorraad is"). Controleer ook of het endpoint
-    aan staat en of je het aan de agent hebt gegeven die het gesprek voert.
-  </Accordion>
-  <Accordion title="De aanroep wordt geweigerd voor hij vertrekt">
-    De host in de URL moet letter voor letter gelijk zijn aan de allowlist host.
-    `api.voorbeeld.nl` en `www.api.voorbeeld.nl` zijn twee verschillende hosts.
-  </Accordion>
-  <Accordion title="Je controle van de ondertekening blijft mislukken">
-    Vrijwel zeker onderteken je de verkeerde bytes: de geparste en opnieuw
-    weggeschreven body in plaats van de rauwe, of de query-string zonder het
-    vraagteken ervoor. Log beide kanten één keer en vergelijk ze teken voor
-    teken.
-  </Accordion>
-  <Accordion title="Hij loopt in een time-out">
-    Jouw API heeft 5 seconden. Is hij traag omdat hij live opzoekt? Bewaar het
-    antwoord aan jouw kant, of stuur de velden terug die je snel hebt en laat de
-    trage weg.
-  </Accordion>
-  <Accordion title="De write-actie gebeurt niet">
-    Een write-endpoint wordt alleen uitgevoerd als automatisch uitvoeren aan
-    staat. Tot die tijd probeert de bot het, krijgt hij te horen dat het niet is
-    ingeschakeld, en zegt hij dat tegen de bezoeker.
-  </Accordion>
-  <Accordion title="Parameters worden geweigerd">
-    De AI heeft iets ingevuld dat niet bij je schema past: een woord waar een
-    getal hoort, of een waarde buiten de `enum`. Scherp de beschrijvingen in het
-    schema aan, want dat is wat de AI leest.
-  </Accordion>
-</AccordionGroup>
+| Wat je ziet | Meestal |
+| --- | --- |
+| Bot roept het nooit aan | De beschrijving. Schrijf de situatie uit in de woorden van de bezoeker. Staat het endpoint aan, bij de juiste agent? |
+| Aanroep vertrekt niet | URL-host en allowlist host zijn niet letterlijk gelijk. |
+| Controle mislukt steeds | Verkeerde bytes: geparste body, of query-string zonder vraagteken. |
+| Time-out | Je API is te traag. Bewaar het antwoord aan jouw kant. |
+| Write-actie gebeurt niet | Automatisch uitvoeren staat uit. |
+| Parameters geweigerd | Past niet bij je schema. Scherp de beschrijvingen aan. |
 
-Je kunt elke aanroep terugzien in de inbox: welk endpoint is gebruikt, welke
-parameters eruit gingen en wat er terugkwam. Dat is de snelste manier om te zien
-waarom een antwoord is geworden wat het is.
+Elke aanroep staat in de inbox: welk endpoint, welke parameters, wat er
+terugkwam.

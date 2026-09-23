@@ -1,52 +1,24 @@
 ---
 title: "Function calling"
-description: "Let your chatbot call your own API during a conversation and answer with live data."
+description: "Let your chatbot call your own API during a conversation."
 ---
 
-Your knowledge base tells the chatbot the rules. Function calling tells it the
-current facts: an order status, a stock level, an available slot. You register
-an address of your own, describe when the bot should use it, and Chatwize calls
-it mid-conversation and answers with what comes back.
+Your knowledge base holds the rules. Function calling fetches the current state:
+an order status, a stock level, a free slot. You give an address and say when
+the bot should use it; Chatwize calls it during the conversation.
 
 ## Where to find it
 
 <Steps>
   <Step title="Open your chatbot">
-    From **Chatbots**, click the chatbot you want to extend.
+    From **Chatbots**, click your chatbot.
   </Step>
-  <Step title="Open the AI agent">
-    In the left sidebar, under **Main menu**, click **AI agent**, then open the agent
-    that should get this ability.
+  <Step title="Open AI agent">
+    In the left sidebar, under **Main menu**. Open the agent that should get
+    this ability.
   </Step>
-  <Step title="Go to Outbound API endpoints">
-    Scroll to **Outbound API endpoints** and click **Add endpoint**.
-  </Step>
-</Steps>
-
-<Note>
-An endpoint belongs to one agent, not to the whole chatbot. If you use multiple
-agents, give the ability to the specialist that needs it. See
-[Multiple agents](/en/multi-agent).
-</Note>
-
-## How one call runs
-
-<Steps>
-  <Step title="The visitor asks something">
-    "Where is my order 10423?"
-  </Step>
-  <Step title="The AI picks the endpoint">
-    It matches the question against your description and decides this endpoint
-    fits. It pulls the parameters out of the conversation, here the order number.
-  </Step>
-  <Step title="Chatwize calls your address">
-    Signed, over HTTPS, with your own headers attached.
-  </Step>
-  <Step title="Your answer goes back as data">
-    The response is handed to the AI as reference material, not as instructions.
-  </Step>
-  <Step title="The bot answers the visitor">
-    In its own words, in the visitor's language.
+  <Step title="Add an endpoint">
+    Under **Outbound API endpoints**, click **Add endpoint**.
   </Step>
 </Steps>
 
@@ -54,561 +26,225 @@ agents, give the ability to the specialist that needs it. See
 
 | Field | What to enter |
 | --- | --- |
-| **Slug** | The tool name the AI knows, in `snake_case`, for example `lookup_order`. Fixed once created. |
-| **Name** | A readable name for yourself, for example `Look up order`. |
-| **When should the bot call this?** | The most important field. Describe what the API does *and* the situation in which the bot should reach for it. Leave it empty and the bot only sees the name and guesses. |
-| **Method** | `GET` for looking something up, `POST`, `PUT` or `PATCH` for something that changes. |
-| **URL** | The full address, starting with `https://`. |
-| **Allowlist host** | The hostname of that address, for example `api.example.com`. It must match the URL exactly; this is what stops the address from being pointed somewhere else later. |
-| **Parameters** | A JSON Schema describing which values the AI may fill in. Empty means the endpoint takes no parameters. |
-| **Action type** | **Read only** for a lookup, **Performs an action** for anything that changes on your side. |
-| **Automatic calling** | Only for write actions, and **on by default**. Switch it off and the bot may try but is told the action is not enabled. |
-| **Max. calls per conversation** | Between 1 and 50, default 5. Protects against a confused bot that keeps calling. |
-| **Headers** | Your own headers, for example `Authorization` or `X-API-Key`. |
+| **Slug** | Name for the AI, in `snake_case`: `lookup_order`. Fixed once created. |
+| **Name** | Name for yourself. |
+| **When should the bot call this?** | The most important field. What the API does and in which situation. |
+| **Method** | `GET` to look something up. `POST`, `PUT` or `PATCH` if something changes. |
+| **URL** | The full address, with `https://`. Publicly reachable. |
+| **Allowlist host** | The hostname from the URL, exactly the same. |
+| **Parameters** | JSON Schema of what the AI may fill in. Empty = no parameters. |
+| **Action type** | **Read only** or **Performs an action (write)**. |
+| **Automatic calling** | Write only. **On by default** — switch off while testing. |
+| **Max. calls per conversation** | Brake against a bot that keeps calling. |
+| **Headers** | Your own headers, such as `Authorization`. |
 
 <Tip>
-Write the description as an instruction, not a label. "Looks up an order by order
-number. Call this when the visitor asks where their order is or when it will
-arrive" works. "Order API" does not.
+Write the description as an instruction: "Looks up an order by order number.
+Call this when the visitor asks where their order is." Not: "Order API".
 </Tip>
 
-## A worked example
+## Example
 
-An order lookup on `https://api.example.com/orders`, with the order number and
-the customer's email as parameters.
+Order lookup on `https://api.example.com/orders`.
 
-**The parameter schema you paste in:**
-
-```json
+```json Parameters
 {
   "type": "object",
   "properties": {
     "order_number": {
       "type": "string",
       "description": "The order number as the visitor states it, for example 10423"
-    },
-    "email": {
-      "type": "string",
-      "description": "The email address the order was placed with"
     }
   },
   "required": ["order_number"]
 }
 ```
 
-**What Chatwize then sends to you:**
-
-```http
-GET /orders?order_number=10423&email=jan%40example.com HTTP/1.1
-Host: api.example.com
-User-Agent: Chatwize-outbound/1.0
-Content-Type: application/json
-X-Chatwize-Outbound-Timestamp: 1758633600
-X-Chatwize-Outbound-Signature: sha256=9f2c...
-Authorization: Bearer your-own-token
-```
-
-With `POST`, `PUT` or `PATCH` the same values arrive as a JSON body instead:
-
-```json
-{ "order_number": "10423", "email": "jan@example.com" }
-```
-
-**What you return:**
-
-```json
-{
-  "status": "shipped",
-  "carrier": "PostNL",
-  "track_and_trace": "3SABC1234567",
-  "expected": "2026-09-25"
-}
-```
-
-**What the visitor reads:** "Your order 10423 went out with PostNL and is
-expected on 25 September. Track and trace: 3SABC1234567."
-
-## A real example: WooCommerce
-
-Your webshop already has an API. In WooCommerce the order list sits at
-`https://yourstore.com/wp-json/wc/v3/orders` and accepts a `search` parameter.
-Authentication is a consumer key and secret, which you send as a Basic
-authorisation header.
-
-| Field | What you enter |
-| --- | --- |
-| **Method** | `GET` |
-| **URL** | `https://yourstore.com/wp-json/wc/v3/orders?per_page=1` |
-| **Allowlist host** | `yourstore.com` |
-| **Header** | `Authorization` with value `Basic <base64 of consumer_key:consumer_secret>` |
-| **Parameters** | One `search` string: "The order number or email address the visitor gives" |
-
-Chatwize then calls `…/orders?per_page=1&search=10423`. Your `per_page=1` stays
-as you set it: a parameter that is already in the URL is never overwritten by
-the AI. That is the trick for everything you want to fix yourself — a page size,
-a shop ID, a fixed status.
-
-<Warning>
-Two things go wrong with a direct webshop connection. A WooCommerce order object
-is large, easily larger than what reaches the AI, so the bot may see only part
-of one order. And a read key sees **every** order, so anyone who guesses an
-order number gets its status.
-</Warning>
-
-Both are solved the same way: put a small endpoint of your own in front, on your
-own domain. Have it require the order number **and** the email address, check
-that the two belong together, and return three fields:
+Chatwize calls `…/orders?order_number=10423`. You reply:
 
 ```json
 { "status": "shipped", "carrier": "PostNL", "expected": "2026-09-25" }
 ```
 
-That is ten lines of code in your shop, and it turns a question of trust ("does
-this visitor belong to this order?") into something your own system answers
-rather than the chatbot. Shopify and Magento work the same way: a `GET` with
-query parameters and a token in a header.
-
-## More examples
-
-Four situations that come up often, each with the schema, the call and the
-response. Open the one that looks like yours.
+The visitor reads: *"Your order is on its way with PostNL and expected on 25
+September."*
 
 <AccordionGroup>
-  <Accordion title="Stock lookup (webshop or wholesaler)">
-    The visitor asks whether something is in stock. One product code in, a
-    number out.
-
-    **Description:** "Returns the current stock of one product. Call this when
-    the visitor asks whether something is in stock, how many there are, or when
-    it will be back."
+  <Accordion title="More examples">
+    **Stock** — "Returns the stock of one product. Call this when the visitor
+    asks whether something is in stock."
 
     ```json
     {
       "type": "object",
       "properties": {
-        "product_code": {
-          "type": "string",
-          "description": "The product or SKU code as shown on the site, for example AB-1234"
-        }
+        "product_code": { "type": "string", "description": "The product code as shown on the site, for example AB-1234" }
       },
       "required": ["product_code"]
     }
     ```
 
-    **The call:** `GET https://api.example.com/stock?product_code=AB-1234`
-
-    ```json
-    { "in_stock": 12, "lead_time_days": 2, "expected": null }
-    ```
-
-    Return what the visitor may know, not your purchase price or your supplier.
-    Everything in this response can end up in the chat window.
-  </Accordion>
-
-  <Accordion title="Availability of a rental item">
-    The visitor wants to know whether a camper, boat or room is free in a given
-    period. Two dates in, free or not out.
-
-    **Description:** "Checks whether an item is free between two dates. Call
-    this as soon as the visitor names a period or asks whether something is
-    still available."
+    **Availability** — an `enum` keeps the bot within your categories.
 
     ```json
     {
       "type": "object",
       "properties": {
-        "category": {
-          "type": "string",
-          "enum": ["compact", "family", "luxury"],
-          "description": "The type the visitor is asking about"
-        },
-        "from": {
-          "type": "string",
-          "description": "Start date as YYYY-MM-DD, for example 2026-07-04"
-        },
-        "until": {
-          "type": "string",
-          "description": "End date as YYYY-MM-DD, for example 2026-07-18"
-        }
+        "category": { "type": "string", "enum": ["compact", "family", "luxury"], "description": "The type the visitor asks about" },
+        "from": { "type": "string", "description": "Start date as YYYY-MM-DD" },
+        "until": { "type": "string", "description": "End date as YYYY-MM-DD" }
       },
       "required": ["category", "from", "until"]
     }
     ```
 
-    ```json
-    { "available": true, "from_per_night": 129, "minimum_nights": 5 }
-    ```
+    A date arrives as text. Check it yourself.
 
-    A date arrives as text, exactly as the AI writes it. Check yourself that it
-    is a valid date and not in the past — a visitor can say "last July" and that
-    is what gets filled in.
-  </Accordion>
-
-  <Accordion title="Create a callback request (a write action)">
-    Here something changes on your side. Set **Action type** to **Performs an
-    action (write)**. Automatic calling is on by default; switch it off while you
-    are testing and the bot will be told the action is not enabled.
-
-    **Description:** "Creates a callback request. Only call this when the
-    visitor explicitly asks to be called back and has given a phone number."
+    **Callback request** — a write action via `POST`. Prevent duplicate
+    requests on your side.
 
     ```json
     {
       "type": "object",
       "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name the visitor gives"
-        },
-        "phone": {
-          "type": "string",
-          "description": "The phone number the visitor gives"
-        },
-        "subject": {
-          "type": "string",
-          "description": "What the call should be about, in one sentence"
-        }
+        "name": { "type": "string", "description": "The name the visitor gives" },
+        "phone": { "type": "string", "description": "The phone number the visitor gives" }
       },
       "required": ["name", "phone"]
     }
     ```
 
-    **The call:** `POST https://api.example.com/callback-request` with those
-    fields as a JSON body.
-
-    ```json
-    { "created": true, "reference": "CB-2026-0912" }
-    ```
-
-    Two things about write actions. Put a brake on your own side — the same
-    number twice within an hour is one request, not two. And return a reference,
-    so the bot has something concrete to name and the visitor doesn't ask three
-    more times to be sure.
+    **No parameters** — `{}`. Opening hours, for example. The best endpoint to
+    start with.
   </Accordion>
 
-  <Accordion title="Opening hours or waiting time (no parameters)">
-    The simplest case: the bot has nothing to fill in.
+  <Accordion title="Connecting a webshop">
+    WooCommerce: `https://yourstore.com/wp-json/wc/v3/orders` with parameter
+    `search`, and your consumer key and secret in an `Authorization` header.
+    Shopify and Magento work the same way: `GET` with query parameters, token in
+    a header.
 
-    **Description:** "Returns today's opening hours and whether we are open
-    right now. Call this for any question about opening hours, including 'are
-    you open now'."
+    Fixed values go in the URL yourself (`?per_page=1`); the AI cannot overwrite
+    those.
 
-    ```json
-    {}
-    ```
-
-    **The call:** `GET https://api.example.com/opening-hours`
-
-    ```json
-    { "open_now": true, "today": "09:00-17:30", "tomorrow": "closed" }
-    ```
-
-    This is the best first endpoint to build: no input, no personal data,
-    nothing that can go wrong. Once this works you know the connection, the
-    signature and the description are all right.
+    <Warning>
+    A read key sees **every** order — anyone who guesses an order number gets
+    its status. Put your own endpoint in front that requires order number and
+    email address and returns only a few fields.
+    </Warning>
   </Accordion>
 </AccordionGroup>
 
-## What your endpoint receives
+## The schema
 
-| Header | Value |
+One flat object. Properties of type `string`, `number`, `integer` or `boolean`,
+optionally with an `enum`. No nested objects or arrays. The `description` is
+what the AI reads.
+
+Everything in the schema can be influenced by what the visitor types. So this
+never belongs in it:
+
+| Never a parameter | Where it belongs |
 | --- | --- |
-| `Content-Type` | `application/json` |
-| `User-Agent` | `Chatwize-outbound/1.0` |
-| `X-Chatwize-Outbound-Timestamp` | The moment of sending, in seconds since 1970 |
-| `X-Chatwize-Outbound-Signature` | `sha256=` followed by the signature |
+| Key, token, password | Header |
+| Customer, account or tenant ID | Fixed in the URL, or resolved by your own endpoint |
+| `admin`, `debug` | Nowhere |
+| `per_page` and other limits | Fixed in the URL |
 
-Your own headers are added to these. Headers starting with `x-chatwize-` are
-ignored, as are `Content-Type`, `Host` and transport headers, so that a header
-of yours can never overwrite the signature.
+<Warning>
+A parameter `customer_id` gets filled with whatever the visitor says. Who gets
+the data is decided by your own system — never by the conversation.
+</Warning>
 
-## Verifying the signature
+## What you receive
 
-The signature proves the call really came from Chatwize and that nobody changed
-it along the way. You get the secret once, when you create the endpoint. Store
-it immediately, because it is not shown again.
+JSON over HTTPS, with your headers and a signature. Verify the signature: then
+you know the request came from Chatwize and was not altered. You see the secret
+once, when you create the endpoint.
 
-The signature is an HMAC-SHA256 over the timestamp, a dot, and what was sent:
-the request body for `POST`, `PUT` and `PATCH`, or the query string including
-the leading `?` for `GET`.
+<AccordionGroup>
+  <Accordion title="Verifying the signature">
+    Two headers: `X-Chatwize-Outbound-Timestamp` (moment of sending) and
+    `X-Chatwize-Outbound-Signature` (`sha256=` plus an HMAC-SHA256 over
+    `<timestamp>.<content>`). The content is the raw body for `POST`, `PUT` and
+    `PATCH`, and the query string for `GET`.
 
-<CodeGroup>
+    <CodeGroup>
 
-```js Node.js
-import { createHmac, timingSafeEqual } from "node:crypto";
+    ```js Node.js
+    import { createHmac, timingSafeEqual } from "node:crypto";
 
-function isFromChatwize(secret, req, rawBody) {
-  const timestamp = req.headers["x-chatwize-outbound-timestamp"];
-  const received = req.headers["x-chatwize-outbound-signature"] ?? "";
+    function isFromChatwize(secret, req, rawBody) {
+      const ts = req.headers["x-chatwize-outbound-timestamp"];
+      const received = req.headers["x-chatwize-outbound-signature"] ?? "";
+      if (!ts || Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false;
 
-  // Refuse anything older than five minutes: that stops a captured
-  // request from being replayed later.
-  const age = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!timestamp || age > 300) return false;
+      const content = req.method === "GET" ? new URL(req.url, "https://x").search : rawBody;
+      const expected = "sha256=" + createHmac("sha256", secret)
+        .update(`${ts}.${content}`).digest("hex");
 
-  const signed = req.method === "GET" ? new URL(req.url, "https://x").search : rawBody;
-  const expected = "sha256=" + createHmac("sha256", secret)
-    .update(`${timestamp}.${signed}`)
-    .digest("hex");
-
-  if (expected.length !== received.length) return false;
-  return timingSafeEqual(Buffer.from(expected), Buffer.from(received));
-}
-```
-
-```python Python
-import hmac, hashlib, time
-
-def is_from_chatwize(secret: str, headers, signed_part: str) -> bool:
-    timestamp = headers.get("X-Chatwize-Outbound-Timestamp", "")
-    received = headers.get("X-Chatwize-Outbound-Signature", "")
-    if not timestamp or abs(time.time() - int(timestamp)) > 300:
-        return False
-
-    digest = hmac.new(
-        secret.encode(),
-        f"{timestamp}.{signed_part}".encode(),
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(f"sha256={digest}", received)
-```
-
-```php PHP
-function isFromChatwize(string $secret, array $headers, string $signedPart): bool {
-    $timestamp = $headers['X-Chatwize-Outbound-Timestamp'] ?? '';
-    $received  = $headers['X-Chatwize-Outbound-Signature'] ?? '';
-    if ($timestamp === '' || abs(time() - (int) $timestamp) > 300) {
-        return false;
+      if (expected.length !== received.length) return false;
+      return timingSafeEqual(Buffer.from(expected), Buffer.from(received));
     }
-    $expected = 'sha256=' . hash_hmac('sha256', "$timestamp.$signedPart", $secret);
-    return hash_equals($expected, $received);
-}
-```
+    ```
 
-</CodeGroup>
+    ```python Python
+    import hmac, hashlib, time
 
-Three things matter here. Sign over the **raw** body, before any JSON parsing:
-reserialising changes the bytes and breaks the comparison. Compare with a
-constant-time function (`timingSafeEqual`, `compare_digest`, `hash_equals`),
-never with `==`. And reject old timestamps, otherwise a captured call can be
-replayed tomorrow.
+    def is_from_chatwize(secret: str, headers, content: str) -> bool:
+        ts = headers.get("X-Chatwize-Outbound-Timestamp", "")
+        received = headers.get("X-Chatwize-Outbound-Signature", "")
+        if not ts or abs(time.time() - int(ts)) > 300:
+            return False
+        digest = hmac.new(secret.encode(), f"{ts}.{content}".encode(), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(f"sha256={digest}", received)
+    ```
+
+    ```php PHP
+    function isFromChatwize(string $secret, array $headers, string $content): bool {
+        $ts = $headers['X-Chatwize-Outbound-Timestamp'] ?? '';
+        $received = $headers['X-Chatwize-Outbound-Signature'] ?? '';
+        if ($ts === '' || abs(time() - (int) $ts) > 300) return false;
+        $expected = 'sha256=' . hash_hmac('sha256', "$ts.$content", $secret);
+        return hash_equals($expected, $received);
+    }
+    ```
+
+    </CodeGroup>
+
+    Sign over the raw body, compare with `timingSafeEqual` / `compare_digest` /
+    `hash_equals` (never `==`), and include the `?` for `GET`.
+  </Accordion>
+</AccordionGroup>
 
 ## What you send back
 
-| | |
-| --- | --- |
-| **Format** | JSON, or anything else readable as text |
-| **Within** | 5 seconds, after that the call is aborted |
-| **Maximum** | 256 KB, larger responses are refused |
-| **Usable** | Roughly the first two thousand characters reach the AI |
-
-Keep responses short. A list of two hundred results is cut off and the bot
-answers from what did fit. Return the five fields that answer the question, not
-your whole record. Everything you send can end up in the chat window, so leave
-out what the visitor should not see.
-
-## Rules for the parameter schema
-
-Only a small, flat subset of JSON Schema is accepted: enough to describe
-parameters clearly, too little for anything to hide in.
-
-| | |
-| --- | --- |
-| **Shape** | One object with properties. No nested objects, no arrays |
-| **Types** | `string`, `number`, `integer`, `boolean` |
-| **Maximum** | 12 parameters |
-| **Per parameter** | An optional `description` of up to 200 characters and an optional `enum` of up to 30 values |
-| **Names** | Letters, digits and underscores, starting with a letter |
-| **Empty** | `{}` means the endpoint takes no parameters |
-
-An `enum` is the cheapest way to keep the bot on track: with
-`"enum": ["standard", "express"]` it cannot invent a third shipping method.
-
-With `GET`, parameters are appended to the URL as a query string. A parameter
-that already appears in the URL is not overwritten, so your own fixed values
-stay as they are.
-
-## Schemas you can copy
-
-Paste one of these into **Parameters**, change the names and rewrite the
-descriptions. The description is what the AI reads to decide what to fill in, so
-write it for a stranger, not for yourself.
-
-**No parameters at all.** The bot calls the endpoint as it stands — for opening
-hours, today's menu, the current queue.
-
-```json
-{}
-```
-
-**One value from the conversation.**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "order_number": {
-      "type": "string",
-      "description": "The order number as the visitor states it, for example 10423"
-    }
-  },
-  "required": ["order_number"]
-}
-```
-
-**A choice from a fixed list.** An `enum` is the cheapest guardrail there is: the
-AI cannot invent a value outside it.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "shipping_method": {
-      "type": "string",
-      "enum": ["standard", "express", "pickup"],
-      "description": "The delivery method the visitor asks about"
-    }
-  },
-  "required": ["shipping_method"]
-}
-```
-
-**Several values, one of them optional.** Everything not in `required` may be
-left out by the bot, so your endpoint must cope with its absence.
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "postcode": {
-      "type": "string",
-      "description": "The postcode of the delivery address, for example 1012AB"
-    },
-    "house_number": {
-      "type": "integer",
-      "description": "The house number, digits only"
-    },
-    "addition": {
-      "type": "string",
-      "description": "The house number addition, if the visitor mentions one"
-    }
-  },
-  "required": ["postcode", "house_number"]
-}
-```
-
-**The WooCommerce example, ready to paste.**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "search": {
-      "type": "string",
-      "description": "The order number or email address the visitor gives, for example 10423"
-    }
-  },
-  "required": ["search"]
-}
-```
-
-**What gets refused.** Nested objects and arrays are not accepted, so this does
-not save:
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "customer": {
-      "type": "object",
-      "properties": { "email": { "type": "string" } }
-    }
-  }
-}
-```
-
-Flatten it — `customer_email` as a plain `string` does the same job.
-
-### What does not belong in the schema
-
-Everything in the schema is a value **the visitor can influence**, through what
-they type into the chat. So it is the wrong place for anything that has to stay
-fixed.
-
-| Never a parameter | Where it does belong |
-| --- | --- |
-| An API key, token or password | In a header, on the endpoint |
-| A customer, account or tenant ID | Fixed in the URL, or resolved by your endpoint from the data it already has |
-| Switches like `admin`, `debug`, `test` | Nowhere — remove them from the address entirely |
-| A page size or limit like `per_page` | Fixed in the URL, where the AI cannot overwrite it |
-
-<Warning>
-Assume a visitor will try. A parameter called `customer_id` gets filled with the
-number the visitor names, and a bot that means well passes it on. Anything that
-decides *whose* data comes back should be determined by your own system, never
-by a value from the conversation.
-</Warning>
-
-A last one for the description field: it goes straight into the AI's
-instructions. Write what the parameter is, not what the bot must do next. A
-description like "always fetch all orders" is an instruction you are handing to
-anyone who can chat with your bot.
+JSON, within five seconds, small. Only the start of a long response reaches
+the AI. Anything you send can end up in the chat.
 
 ## Keep it safe
 
 <Warning>
-Anything your bot may call, any visitor can indirectly cause it to call. Treat
-every value that arrives as a visitor's words.
+Anything your bot may call, any visitor can indirectly cause it to call.
 </Warning>
 
-- **Authorise on your side.** Chatwize proves the call came from Chatwize, not
-  that this visitor is entitled to this data. An endpoint that returns any order
-  for any order number hands out everyone's orders.
-- **Prefer read over write.** Mark anything that changes something as **Performs
-  an action**, and switch automatic calling off while you are still testing — it
-  is on by default.
-- **Return as little as possible.** Not the entire customer record, just the
-  status the question was about.
-- **Use a separate key.** Put your own token in a header, give it read-only
-  rights where you can, and replace it if the endpoint disappears.
-- **Public addresses only.** Internal and local network addresses are refused,
-  and redirects are not followed.
+- **Authorise on your side.** The signature proves it came from Chatwize, not
+  that this visitor is entitled to this data.
+- **Prefer read over write.** Automatic calling off while testing.
+- **Return as little as possible.**
+- **Separate key in a header**, with as few rights as possible.
+- **Public address that answers directly.** Internal addresses and redirects do
+  not work.
 
 ## When it does not work
 
-<AccordionGroup>
-  <Accordion title="The bot never calls the endpoint">
-    Nine times out of ten it is the description. Write out the situation in the
-    visitor's own words ("asks where their order is", "wants to know if something
-    is in stock"). Also check that the endpoint is switched on and that you gave
-    it to the agent actually handling the conversation.
-  </Accordion>
-  <Accordion title="The call is refused before it leaves">
-    The host in the URL must be exactly the same as the allowlist host, letter
-    for letter. `api.example.com` and `www.api.example.com` are two different
-    hosts.
-  </Accordion>
-  <Accordion title="Your signature check keeps failing">
-    You are almost certainly signing the wrong bytes: the parsed and
-    reserialised body instead of the raw one, or the query string without its
-    leading `?`. Log both sides once and compare them character by character.
-  </Accordion>
-  <Accordion title="It times out">
-    Your API has 5 seconds. Is it slow because it looks things up live? Cache
-    the answer on your side, or return the fields you have quickly and leave out
-    the slow one.
-  </Accordion>
-  <Accordion title="The write action does not happen">
-    A write endpoint only runs when automatic calling is on. Until then the bot
-    tries, is told it is not enabled, and says so to the visitor.
-  </Accordion>
-  <Accordion title="Parameters are refused">
-    The AI filled in something that does not match your schema: a word where a
-    number belongs, or a value outside the `enum`. Tighten the descriptions in
-    the schema, because that is what the AI reads.
-  </Accordion>
-</AccordionGroup>
+| What you see | Usually |
+| --- | --- |
+| Bot never calls it | The description. Write out the situation in the visitor's words. Is the endpoint on, and on the right agent? |
+| Call never leaves | URL host and allowlist host are not exactly the same. |
+| Verification keeps failing | Wrong bytes: parsed body, or query string without the `?`. |
+| Timeout | Your API is too slow. Cache the answer on your side. |
+| Write action does not happen | Automatic calling is off. |
+| Parameters refused | Does not match your schema. Sharpen the descriptions. |
 
-You can follow every call in the inbox: which endpoint was used, which
-parameters went out, and what came back. That is the fastest way to see why an
-answer turned out the way it did.
+Every call is in the inbox: which endpoint, which parameters, what came back.
