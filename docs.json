@@ -8,10 +8,10 @@
     "light": "#8B8AFF",
     "dark": "#2A28C7"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/favicon.svg",
   "logo": {
-    "light": "/logo/light.png",
-    "dark": "/logo/dark.png",
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg",
     "href": "https://chatwize.ai"
   },
   "navigation": {
